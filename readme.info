@@ -1,0 +1,98 @@
+#############################################
+# SETUP
+#############################################
+# init the module on location of main package
+go mod init 
+go build
+./moonlander
+
+
+#############################################
+# go install + code completion + tooling
+#############################################
+https://golang.org/doc/install?download=go1.15.2.linux-amd64.tar.gz#download
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.15.2.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+
+ctrl+shift+p 
+go: install / update tools
+go: Locate configures go tools
+
+# Use go Language Server (gopls)
+ctrl + comma
+extensions >> go >> check Use Language Server
+(just search for "Use Language Server")
+
+# fix for gopls bug
+# sets goroot in visual studio code (for when you not setting it as environt variable)
+ctrl +  comma >> search >>  "go.goroot"
+"go.goroot": "/usr/local/go",
+
+
+#############################################
+# IMPORT NOTES
+#############################################
+Ebiten
+using master for text.BoundString() functionality
+go get github.com/hajimehoshi/ebiten@master
+
+
+#############################################
+# DEBUG
+#############################################
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "env": {},
+            "args": []
+        },
+        {
+            "name": "Debug",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}",
+            "env": {},
+            "args": []
+        }
+    ]
+}
+
+
+#############################################
+# TODO
+#############################################
+fix hit detection
+- collision does not take rotation in account
+> could make hit square + center in object, then rotation would not matter that much
+> so that means for the object that can rotate like e.g should be close to a square vissually
+
+- at the moment a lot of functions are Capitalled as public, but not always needed
+> need better refactor mechanics IDE
+
+- think about behaviours / strategy patters, like move, contralable, 
+> attach them (interface + composition, entity based design?)
+
+- maye make a level format, or use a program like Tiled
+> tiles based level design might not fit
+
+Make a game:
+- make a finish for a race like game
+    - hitters as checkpoint + finish, e.g need to go to 3x checkpoint, and then over finish (to do 1 lap)
+- make some timer
+- make fuel mechanic's
+- add limited nr of lives
+- draw effects for retro + main thrusters
+
+- make background components, which stretches image to screen 
+- make background which loop-able with a camera
+
+
+
