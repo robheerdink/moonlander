@@ -11,38 +11,46 @@ import (
 
 // TestObject is used for testing collisions, its a controllable square
 type TestObject struct {
-	speed, imgHW, imgHH, rectHW, rectHH float64
+	speed, imgHW, imgHH             float64
+	hitX, hitY, hitW, hitH, hitDiff int
+	collideObject                   *Object
 	Object
-	collideObject *Object
 }
 
 // NewCollideTest constructor
-func NewCollideTest(id int, x, y, z float64, v Vector, rx, ry, rw, rh int, c color.RGBA) TestObject {
+func NewCollideTest(id, x, y, z int, v Vector, rx, ry, rw, rh int, c color.RGBA) TestObject {
 	return TestObject{
-		Object: NewObjectNoImage(id, x, y, z, v, rx, ry, rw, rh, c),
+		Object: NewObject(id, nil, x, y, z, v, rx, ry, rw, rh, true, c),
 		speed:  0.8,
 		imgHW:  float64(rw/2 + rx),
 		imgHH:  float64(rh/2 + ry),
-		rectHW: float64((rw) / 2),
-		rectHH: float64((rh) / 2),
+		// keep original hit rect values, to calc rotating hit rect
+		hitX:    rx,
+		hitY:    ry,
+		hitW:    rw,
+		hitH:    rh,
+		hitDiff: (rw - rh) / 2,
 	}
 }
 
 //Draw overrides Drawable interface (from default Sprite)
 func (o *TestObject) Draw(screen *ebiten.Image) error {
 	// draw vissual image
-	if o.Img != nil {
+	if o.img != nil {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-o.imgHW, -o.imgHW)
-		op.GeoM.Rotate(o.Z)
-		op.GeoM.Translate(o.X+o.imgHW, o.Y+o.imgHH)
-		screen.DrawImage(o.Img, op)
+		op.GeoM.Translate(-o.imgHW, -o.imgHH)
+		op.GeoM.Rotate(o.z)
+		op.GeoM.Translate(o.x+o.imgHW, o.y+o.imgHH)
+		screen.DrawImage(o.img, op)
 	}
 	// draw hit rect
-	if o.RectImg != nil {
+	if o.rectImg != nil {
+		// need to recreate image, because it changes shape (expensive only use for debug)
+		o.rectImg, _ = ebiten.NewImage(o.rect.w, o.rect.h, ebiten.FilterNearest)
+		o.rectImg.Fill(con.Cyan50)
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(o.Rect.X), float64(o.Rect.Y))
-		screen.DrawImage(o.RectImg, op)
+		op.GeoM.Translate(float64(o.rect.x), float64(o.rect.y))
+		screen.DrawImage(o.rectImg, op)
 	}
 	return nil
 }
@@ -52,37 +60,47 @@ func (o *TestObject) Update(screen *ebiten.Image) error {
 	o.removeHit()
 
 	// slow down
-	o.Velocity.x *= 0.9
-	o.Velocity.y *= 0.9
+	o.vector.x *= 0.9
+	o.vector.y *= 0.9
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		o.Velocity.y = o.speed * -1
+		o.vector.y = o.speed * -1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		o.Velocity.y = o.speed
+		o.vector.y = o.speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		o.Velocity.x = o.speed * -1
+		o.vector.x = o.speed * -1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		o.Velocity.x = o.speed
+		o.vector.x = o.speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		o.Z -= (o.speed * 2) * con.DegToRad
+		o.z -= (o.speed * 2) * DegToRad
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyE) {
-		o.Z += (o.speed * 2) * con.DegToRad
+		o.z += (o.speed * 2) * DegToRad
 	}
-	if math.Abs(o.Z) > math.Pi*2 {
-		o.Z = 0
+	if math.Abs(o.z) > DPI {
+		o.z = 0
 	}
+
+	zx := math.Sin(o.z)
+	zy := math.Cos(o.z)
+
+	nzx := math.Pow(zx, 2)
+	nzy := math.Pow(zy, 2)
+	o.rect.w = int(float64(o.hitH)*nzx + float64(o.hitW)*nzy)
+	o.rect.h = int(float64(o.hitW)*nzx + float64(o.hitH)*nzy)
+	o.rx = o.hitX + int(float64(o.hitDiff)*nzx)
+	o.ry = o.hitY + int(float64(o.hitDiff)*nzx)*-1
 
 	// update position
-	o.X += o.Velocity.x
-	o.Y += o.Velocity.y
+	o.x += o.vector.x
+	o.y += o.vector.y
 
 	// update hit rect
-	o.Rect.SetXY(int(o.X)+o.RX, int(o.Y)+o.RY)
+	o.rect.setXY(int(o.x)+o.rx, int(o.y)+o.ry)
 	return nil
 }
 
@@ -92,28 +110,32 @@ func (o *TestObject) GetObject() *Object {
 }
 
 //Collide implements interface Collider, handles collission with ojects
-func (o *TestObject) Collide(objects []*Object) error {
-	for _, t := range objects {
-		if &o.Rect != &t.Rect {
+func (o *TestObject) Collide(hitAbles []HitAble) error {
+
+	for _, h := range hitAbles {
+		t := h.GetObject()
+		if &o.rect != &t.rect {
 			hit, sides := CheckHit(o.GetObject(), t, true, true)
 			if hit {
-				o.addHit(t)
 				// fmt.Printf("%s hits %s on sides %+v\n", con.ID[o.ID], con.ID[t.ID], sides)
-				if sides.left {
-					o.X = float64(t.Rect.X-o.Rect.W-o.RX) - 1
-					o.Velocity.x = 0
-				}
-				if sides.right {
-					o.X = float64(t.Rect.X+t.Rect.W-o.RX) + 1
-					o.Velocity.x = 0
-				}
-				if sides.top {
-					o.Y = float64(t.Rect.Y-o.Rect.H-o.RY) - 1
-					o.Velocity.y = 0
-				}
-				if sides.bottom {
-					o.Y = float64(t.Rect.Y+t.Rect.H-o.RY) + 1
-					o.Velocity.y = 0
+				if t.solid {
+					o.addHit(t)
+					if sides.left {
+						o.x = float64(t.rect.x-o.rect.w-o.rx) - 1
+						o.vector.x = 0
+					}
+					if sides.right {
+						o.x = float64(t.rect.x+t.rect.w-o.rx) + 1
+						o.vector.x = 0
+					}
+					if sides.top {
+						o.y = float64(t.rect.y-o.rect.h-o.ry) - 1
+						o.vector.y = 0
+					}
+					if sides.bottom {
+						o.y = float64(t.rect.y+t.rect.h-o.ry) + 1
+						o.vector.y = 0
+					}
 				}
 			}
 		}

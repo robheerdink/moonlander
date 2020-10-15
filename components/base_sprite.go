@@ -6,28 +6,28 @@ import (
 
 // Sprite is something which can be drawn and optionally updated
 type Sprite struct {
-	ID       int
-	Img      *ebiten.Image
-	X, Y, Z  float64
-	Velocity Vector
+	img     *ebiten.Image
+	x, y, z float64
+	vector  Vector
 }
 
 // NewSprite creates a Sprite, a Sprite can be drawn and optionally updated, sprites have no collision
-func NewSprite(id int, img *ebiten.Image, x, y, z float64, v Vector) Sprite {
-	return Sprite{id, img, x, y, z, v}
+func NewSprite(img *ebiten.Image, x, y, z int, v Vector) Sprite {
+	return Sprite{img, float64(x), float64(y), float64(z), v}
 }
 
 // Draw Sprite
 func (o *Sprite) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(o.X, o.Y)
-	screen.DrawImage(o.Img, op)
+	op.GeoM.Translate(o.x, o.y)
+	//op.GeoM.Scale(1, 1,2)
+	screen.DrawImage(o.img, op)
 	return nil
 }
 
 // Update Sprite
 func (o *Sprite) Update(screen *ebiten.Image) error {
-	o.X += o.Velocity.x
-	o.Y += o.Velocity.y
+	o.x += o.vector.x
+	o.y += o.vector.y
 	return nil
 }

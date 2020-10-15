@@ -17,6 +17,7 @@ import (
 var (
 	fontNormal font.Face
 	fontBig    font.Face
+	fontArcade font.Face
 	mouse      pointer
 )
 
@@ -47,6 +48,11 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	ar, err := truetype.Parse(fonts.ArcadeN_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	const dpi = 72
 	fontNormal = truetype.NewFace(tt, &truetype.Options{
 		Size:    24,
@@ -55,6 +61,11 @@ func init() {
 	})
 	fontBig = truetype.NewFace(tt, &truetype.Options{
 		Size:    48,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	fontArcade = truetype.NewFace(ar, &truetype.Options{
+		Size:    24,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})

@@ -42,10 +42,10 @@ func (g *Game) Update(screen *ebiten.Image) error {
 			i.Update(screen)
 		}
 		for _, i := range lvl.CollideList {
-			i.Collide(lvl.ObjectList)
+			i.Collide(lvl.HitAbleList)
 		}
 
-		if ebiten.IsKeyPressed(ebiten.KeyBackspace) {
+		if ebiten.IsKeyPressed(ebiten.KeyBackslash) {
 			g.mode = ModeGameOver
 			loadState(g, "")
 		}

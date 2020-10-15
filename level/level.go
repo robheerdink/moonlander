@@ -1,9 +1,14 @@
 package level
 
 import (
+	//"image/color"
+	"bytes"
+	"image"
 	"log"
 	"math/rand"
+	"time"
 
+	images "moonlander/assets"
 	comp "moonlander/components"
 	con "moonlander/constants"
 
@@ -16,9 +21,9 @@ var (
 	background  *ebiten.Image
 	spaceShip   *ebiten.Image
 	DrawList    []comp.Drawer
+	HitAbleList []comp.HitAble
 	UpdateList  []comp.Updater
 	CollideList []comp.Collider
-	ObjectList  []*comp.Object
 )
 
 // ClearLevel clears are references from level
@@ -26,10 +31,14 @@ func ClearLevel() {
 	background = nil
 	spaceShip = nil
 	DrawList = nil
+	HitAbleList = nil
 	UpdateList = nil
 	CollideList = nil
-	ObjectList = nil
 }
+
+var (
+	runnerImage *ebiten.Image
+)
 
 // LoadLevel loads a specific level
 func LoadLevel(name string) {
@@ -38,116 +47,102 @@ func LoadLevel(name string) {
 	preloadImages()
 
 	comp.WP = comp.WorldProperties{
-		Gravity:     0,
+		Gravity:     0.000,
 		Friction:    0.992,
-		LevelWidth:  1280,
-		LevelHeight: 1024,
+		LevelWidth:  1150,
+		LevelHeight: 864,
 	}
-	HLW := float64(comp.WP.LevelWidth / 2)
-	HLH := float64(comp.WP.LevelHeight / 2)
-	V := comp.NewVector(0, 0)
-	var walls []*comp.Object
+	comp.LP = comp.LevelProperties{
+		Lives:      3,
+		CurrentLap: 0,
+		MaxLaps:    3,
+		LapTimes:   []time.Duration{},
+	}
+
+	// some abbrivations
+	LW := int(comp.WP.LevelWidth)
+	LH := int(comp.WP.LevelHeight)
+	HLW := int(LW / 2)
+	HLH := int(LH / 2)
+	V := comp.Vector{}
 	var size int = 16
+	var cpSize int = 4
+
+	bg := comp.NewSprite(background, 0, 0, 0, V)
+	tb := comp.NewTextBlock(LW-150, 50)
+	px, py := 0, 0
+
+	img, _, err := image.Decode(bytes.NewReader(images.Runner_png))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if name == "lvl01" {
-		// create components
-		bg := comp.NewSprite(0, background, 0, 0, 0, V)
-		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, HLW-300, HLH+100, 0, V, 18, 18, 28, 28, con.Red)
-		p2 := comp.NewCollideTest(con.IDTester, HLW-200, HLH+200, 0, V, 0, 0, 16, 16, con.Green)
-		wallT := comp.NewObjectNoImage(con.IDWall, 0, 0, 0, V, 0, 0, comp.WP.LevelWidth-size, size, con.Blue)
-		wallL := comp.NewObjectNoImage(con.IDWall, 0, float64(size), 0, V, 0, 0, size, comp.WP.LevelHeight-size, con.Blue)
-		wallB := comp.NewObjectNoImage(con.IDWall, 16, float64(comp.WP.LevelHeight)-float64(size), 0, V, 0, 0, comp.WP.LevelWidth, size, con.Blue)
-		wallR := comp.NewObjectNoImage(con.IDWall, float64(comp.WP.LevelWidth)-float64(size), 0, 0, V, 0, 0, size, comp.WP.LevelHeight-size, con.Blue)
-		wallCL := comp.NewObjectNoImage(con.IDWall, 400, HLH-float64(size), 0, V, 0, 0, int(HLW-400), size, con.Blue)
-		wallCR := comp.NewObjectNoImage(con.IDWall, float64(HLW), HLH-float64(size), 0, V, 0, 0, int(HLW-400), size, con.Yellow)
-		wallCT := comp.NewObjectNoImage(con.IDWall, HLW-float64(size), float64(400-size), 0, V, 0, 0, size, int(HLH-400), con.Green)
-		wallCB := comp.NewObjectNoImage(con.IDWall, HLW-float64(size), float64(HLH), 0, V, 0, 0, size, int(HLH)-400, con.Purple)
-		walls = append(walls, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		runnerImage, _ = ebiten.NewImageFromImage(img, ebiten.FilterDefault)
+		anim := comp.NewAnim(runnerImage, 200, 200, 0, V, comp.NewFrame(0, 32, 32, 32, 8, 5))
 
+		comp.WP.Gravity = 0 //0.015
+		px, py = HLW-300, HLH+100
+		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, con.Red50)
+		cp1 := comp.NewCheckpoint(con.IDCheckpoint, HLW-cpSize, HLH-cpSize/2, HLW, cpSize, con.Cyan25, true)
+		cp2 := comp.NewCheckpoint(con.IDCheckpoint, HLW-cpSize/2, 0, cpSize, HLH, con.Green25, true)
+		cp3 := comp.NewCheckpoint(con.IDCheckpoint, 0, HLH-cpSize/2, HLW, cpSize, con.Yellow25, true)
+		finish := comp.NewFinish(con.IDFinish, HLW-cpSize/2, HLH, cpSize, HLH, con.White25, []*comp.Checkpoint{&cp1, &cp2, &cp3})
+		wallT := comp.NewWall(con.IDWall, 0, 0, LW-size, size, con.Blue50)
+		wallL := comp.NewWall(con.IDWall, 0, size, size, LH-size, con.Blue50)
+		wallB := comp.NewWall(con.IDWall, size, LH-size, LW-size, size, con.Blue50)
+		wallR := comp.NewWall(con.IDWall, LW-size, 0, size, LH-size, con.Blue50)
+		wallCL := comp.NewWall(con.IDWall, 200, HLH-size/2, HLW-200, size, con.Cyan50)
+		wallCR := comp.NewWall(con.IDWall, HLW, HLH-size/2, HLW-200, size, con.Yellow50)
+		wallCT := comp.NewWall(con.IDWall, HLW-size/2, 200-size/2, size, HLH-200, con.Green50)
+		wallCB := comp.NewWall(con.IDWall, HLW-size/2, HLH+size/2, size, HLH-200, con.Purple50)
 		// add to interface lists
-		DrawList = append(DrawList, &bg, &p1, &p2)
-		UpdateList = append(UpdateList, &p1, &p2)
-		CollideList = append(CollideList, &p1, &p2)
-		for _, o := range walls {
-			DrawList = append(DrawList, o)
-		}
-
-		var dontOverlap []*comp.Object = append(walls, &p1.Object, &p2.Object)
-		spwanRandomSquares(dontOverlap, 5, 100)
-
-		// add all object to which we can collide to Objectlist
-		for _, o := range CollideList {
-			ObjectList = append(ObjectList, o.GetObject())
-		}
-		for _, o := range walls {
-			ObjectList = append(ObjectList, o)
-		}
+		DrawList = append(DrawList, &bg, &anim, &tb, &p1, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		HitAbleList = append(HitAbleList, &p1, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		UpdateList = append(UpdateList, &p1, &anim)
+		CollideList = append(CollideList, &p1)
+		//spwanRandomSquares(HitAbleList, 2, 50)
 
 	} else if name == "lvl02" {
-
-		// create components
-		bg := comp.NewSprite(0, background, 0, 0, 0, V)
-		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, HLW+100, HLH+100, 0, V, 18, 18, 28, 28, con.Red)
-		p2 := comp.NewCollideTest(con.IDTester, HLW-100, HLH+100, 0, V, 4, 4, 24, 24, con.Green)
-		wallT := comp.NewObjectNoImage(con.IDWall, 0, 0, 0, V, 0, 0, comp.WP.LevelWidth-size, size, con.Blue)
-		wallL := comp.NewObjectNoImage(con.IDWall, 0, float64(size), 0, V, 0, 0, size, comp.WP.LevelHeight-size, con.Blue)
-		wallB := comp.NewObjectNoImage(con.IDWall, 16, float64(comp.WP.LevelHeight)-float64(size), 0, V, 0, 0, comp.WP.LevelWidth, size, con.Blue)
-		wallR := comp.NewObjectNoImage(con.IDWall, float64(comp.WP.LevelWidth)-float64(size), 0, 0, V, 0, 0, size, comp.WP.LevelHeight-size, con.Blue)
-		wallCL := comp.NewObjectNoImage(con.IDWall, 300, HLH-float64(size), 0, V, 0, 0, int(HLW-300), size, con.Blue)
-		wallCR := comp.NewObjectNoImage(con.IDWall, float64(HLW), HLH-float64(size), 0, V, 0, 0, int(HLW-300), size, con.Yellow)
-		wallCT := comp.NewObjectNoImage(con.IDWall, HLW-float64(size), float64(300-size), 0, V, 0, 0, size, int(HLH-300), con.Green)
-		wallCB := comp.NewObjectNoImage(con.IDWall, HLW-float64(size), float64(HLH), 0, V, 0, 0, size, int(HLH)-300, con.Purple)
-		walls = append(walls, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
-
+		comp.WP.Gravity = 0.00
+		px, py = HLW-300, HLH+100
+		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, con.Red50)
+		p2 := comp.NewCollideTest(con.IDTester, HLW-100, HLH+100, 0, V, 4, 4, 24, 56, con.Green50)
+		wallT := comp.NewWall(con.IDWall, 0, 0, LW-size, size, con.Blue50)
+		wallL := comp.NewWall(con.IDWall, 0, size, size, LH-size, con.Blue50)
+		wallB := comp.NewWall(con.IDWall, size, LH-size, LW-size, size, con.Blue50)
+		wallR := comp.NewWall(con.IDWall, LW-size, 0, size, LH-size, con.Blue50)
+		wallCL := comp.NewWall(con.IDWall, 200, HLH-size/2, HLW-200, size, con.Cyan50)
+		wallCR := comp.NewWall(con.IDWall, HLW, HLH-size/2, HLW-200, size, con.Yellow50)
+		wallCT := comp.NewWall(con.IDWall, HLW-size/2, 200-size/2, size, HLH-200, con.Green50)
+		wallCB := comp.NewWall(con.IDWall, HLW-size/2, HLH+size/2, size, HLH-200, con.Purple50)
 		// add to interface lists
-		DrawList = append(DrawList, &bg, &p1, &p2)
+		DrawList = append(DrawList, &bg, &tb, &p1, &p2, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		HitAbleList = append(HitAbleList, &p1, &p2, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		UpdateList = append(UpdateList, &p1, &p2)
 		CollideList = append(CollideList, &p1, &p2)
-		for _, o := range walls {
-			DrawList = append(DrawList, o)
-		}
-
-		var dontOverlap []*comp.Object = append(walls, &p1.Object, &p2.Object)
-		spwanRandomSquares(dontOverlap, 500, 8)
-
-		// add all object to which we can collide to Objectlist
-		for _, o := range CollideList {
-			ObjectList = append(ObjectList, o.GetObject())
-		}
-		for _, o := range walls {
-			ObjectList = append(ObjectList, o)
-		}
+		spwanRandomSquares(HitAbleList, 500, 8)
 
 	} else if name == "lvl03" {
-		// set world properties
-		comp.WP.Gravity = 0.04
-
-		// create components
-		bg := comp.NewSprite(0, background, 0, 0, 0, V)
-		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, HLW+100, HLH+100, 0, V, 18, 18, 28, 28, con.Red)
-		wallB := comp.NewObjectNoImage(con.IDWall, 16, float64(comp.WP.LevelHeight)-float64(size), 0, V, 0, 0, comp.WP.LevelWidth, size, con.Blue)
-		wallCL := comp.NewObjectNoImage(con.IDWall, 300, HLH-float64(size), 0, V, 0, 0, int(HLW-300), size, con.Blue)
-		wallCR := comp.NewObjectNoImage(con.IDWall, float64(HLW), HLH-float64(size), 0, V, 0, 0, int(HLW-300), size, con.Yellow)
-		wallCT := comp.NewObjectNoImage(con.IDWall, HLW-float64(size), float64(300-size), 0, V, 0, 0, size, int(HLH-300), con.Green)
-		wallCB := comp.NewObjectNoImage(con.IDWall, HLW-float64(size), float64(HLH), 0, V, 0, 0, size, int(HLH)-300, con.Purple)
-		walls = append(walls, &wallB, &wallCL, &wallCR, &wallCT, &wallCB)
-
+		comp.WP.Gravity = 0.03
+		px, py = HLW, HLH+100
+		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, con.Red50)
+		p2 := comp.NewCollideTest(con.IDTester, HLW-100, HLH+100, 0, V, 4, 4, 24, 56, con.Green50)
+		wallB := comp.NewWall(con.IDWall, 0, LH-size, LW, size, con.Green50)
+		wallCL := comp.NewWall(con.IDWall, 400, HLH-size/2, HLW-400, size, con.Cyan50)
+		wallCR := comp.NewWall(con.IDWall, HLW, HLH-size/2, HLW-400, size, con.Yellow50)
+		wallCT := comp.NewWall(con.IDWall, HLW-size/2, 400-size/2, size, HLH-400, con.Green50)
+		wallCB := comp.NewWall(con.IDWall, HLW-size/2, HLH+size/2, size, HLH-400, con.Purple50)
 		// add to interface lists
-		DrawList = append(DrawList, &bg, &p1)
-		UpdateList = append(UpdateList, &p1)
-		CollideList = append(CollideList, &p1)
-		for _, o := range walls {
-			DrawList = append(DrawList, o)
-		}
-
-		// add all object to which we can collide to Objectlist
-		for _, o := range CollideList {
-			ObjectList = append(ObjectList, o.GetObject())
-		}
-		for _, o := range walls {
-			ObjectList = append(ObjectList, o)
-		}
+		DrawList = append(DrawList, &bg, &tb, &p1, &p2, &wallB, &wallCL, &wallCR, &wallCT, &wallCB)
+		HitAbleList = append(HitAbleList, &p1, &p2, &wallB, &wallCL, &wallCR, &wallCT, &wallCB)
+		UpdateList = append(UpdateList, &p1, &p2)
+		CollideList = append(CollideList, &p1, &p2)
 	}
+
+	// update player position
+	comp.LP.PX = px
+	comp.LP.PY = py
 }
 
 func preloadImages() {
@@ -163,30 +158,33 @@ func preloadImages() {
 }
 
 // spwans squares in playable level dimensions, and makes sure that the squares dont overlap other objects
-func spwanRandomSquares(list []*comp.Object, count, size int) {
+func spwanRandomSquares(list []comp.HitAble, count, size int) {
 	for i := 0; i < count; i++ {
 		// get random free position and random velocity
 		x, y := getRandonPosition(size, size, size, list)
 		choices := []int{2, -2}
 		vx := float64(choices[rand.Int()%len(choices)])
 		vy := float64(choices[rand.Int()%len(choices)])
-		s := comp.NewSquare(con.IDSquare, x, y, 0, comp.NewVector(vx, vy), 0, 0, size, size, con.Purple)
-		list = append(list, &s.Object)
+		s := comp.NewSquare(con.IDSquare, x, y, 0, comp.NewVector(vx, vy), 0, 0, size, size, con.Purple50)
+		// add Square to interface lists
 		DrawList = append(DrawList, &s)
 		UpdateList = append(UpdateList, &s)
 		CollideList = append(CollideList, &s)
+		HitAbleList = append(HitAbleList, &s)
+		//list = append(list, &s)
 	}
 }
 
-func getRandonPosition(offsetX, offsetY, space int, dontOverlap []*comp.Object) (float64, float64) {
+func getRandonPosition(offsetX, offsetY, space int, dontOverlap []comp.HitAble) (int, int) {
 	x := rand.Intn(int(comp.WP.LevelWidth)-(offsetX*2)) + offsetX
 	y := rand.Intn(int(comp.WP.LevelHeight)-(offsetY*2)) + offsetY
-	r := comp.Rect{X: x, Y: y, W: space, H: space}
-	xf, yf := float64(x), float64(y)
+	r := comp.NewRect(x, y, space, space)
 	for _, o := range dontOverlap {
-		if comp.CheckOverlap(&r, &o.Rect) {
-			xf, yf = getRandonPosition(offsetX, offsetX, space, dontOverlap)
+		if o.GetObject().GetSolid() {
+			if comp.CheckOverlap(&r, o.GetObject().GetRect()) {
+				x, y = getRandonPosition(offsetX, offsetX, space, dontOverlap)
+			}
 		}
 	}
-	return xf, yf
+	return x, y
 }

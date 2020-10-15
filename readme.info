@@ -69,30 +69,37 @@ go get github.com/hajimehoshi/ebiten@master
 #############################################
 # TODO
 #############################################
-fix hit detection
-- collision does not take rotation in account
-> could make hit square + center in object, then rotation would not matter that much
-> so that means for the object that can rotate like e.g should be close to a square vissually
-
-- at the moment a lot of functions are Capitalled as public, but not always needed
-> need better refactor mechanics IDE
-
-- think about behaviours / strategy patters, like move, contralable, 
-> attach them (interface + composition, entity based design?)
-
-- maye make a level format, or use a program like Tiled
-> tiles based level design might not fit
-
-Make a game:
-- make a finish for a race like game
-    - hitters as checkpoint + finish, e.g need to go to 3x checkpoint, and then over finish (to do 1 lap)
-- make some timer
+ 
+- attach them (interface + composition, entity based design?)
 - make fuel mechanic's
 - add limited nr of lives
+- create animation object
 - draw effects for retro + main thrusters
+    - animations
+    - animation of thrusters can be used on 4 sides, so be part of player anim because 4*3*2*1 anims
+    - animations must be a sub gfx of player, and should then also rotate with player
 
 - make background components, which stretches image to screen 
 - make background which loop-able with a camera
+
+#############################################
+# run / test WebAssembly
+#############################################
+cd /home/rob/work/projects/go/src/moonlander
+wasmserve 
+
+
+#############################################
+# build WebAssembly 
+#############################################
+
+# add mine type to ngninx
+sudo nano /etc/nginx/mime.types
+application/wasm                                wasm;
+sudo systemctl restart nginx
+
+# clear cache or use incognito mode
+http://localhost/wasm/index.html
 
 
 
