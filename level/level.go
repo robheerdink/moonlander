@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"time"
 
-	images "moonlander/assets"
+	ass "moonlander/assets"
 	comp "moonlander/components"
 	con "moonlander/constants"
 
@@ -72,7 +72,7 @@ func LoadLevel(name string) {
 	tb := comp.NewTextBlock(LW-150, 50)
 	px, py := 0, 0
 
-	img, _, err := image.Decode(bytes.NewReader(images.Runner_png))
+	img, _, err := image.Decode(bytes.NewReader(ass.Runner_png))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func LoadLevel(name string) {
 		runnerImage, _ = ebiten.NewImageFromImage(img, ebiten.FilterDefault)
 		anim := comp.NewAnim(runnerImage, 200, 200, 0, V, comp.NewFrame(0, 32, 32, 32, 8, 5))
 
-		comp.WP.Gravity = 0 //0.015
+		comp.WP.Gravity = 0.015
 		px, py = HLW-300, HLH+100
 		p1 := comp.NewPlayer(con.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, con.Red50)
 		cp1 := comp.NewCheckpoint(con.IDCheckpoint, HLW-cpSize, HLH-cpSize/2, HLW, cpSize, con.Cyan25, true)

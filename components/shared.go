@@ -185,3 +185,22 @@ func getIntersetRect(r *Rect, t *Rect) *Rect {
 	y2 := int(math.Min(float64(r.y+r.h), float64(t.y+t.h)))
 	return &Rect{x1, y1, x2 - x1, y2 - y1}
 }
+
+// GetRotatedPoint transforms points
+// cy,cy are the world coordinates of the center of an object.
+// ox, oy is the relative offset for a point from the center of the object
+// ox, oy will be different per point (top left, top right, etc)
+// rad, rotation in radials
+func GetRotatedPoint(cx, cy, ox, oy, rad float64) (x, y float64) {
+	rx := cx + (ox * math.Cos(rad)) - (oy * math.Sin(rad))
+	ry := cy + (ox * math.Sin(rad)) + (oy * math.Cos(rad))
+	return rx, ry
+}
+
+
+
+// func GetFourRotatedPoints(cx, cy, ox, oy, rad float64) (x, y float64) {
+// 	rx := cx + (ox * math.Cos(rad)) - (oy * math.Sin(rad))
+// 	ry := cy + (ox * math.Sin(rad)) + (oy * math.Cos(rad))
+// 	return rx, ry
+// }
