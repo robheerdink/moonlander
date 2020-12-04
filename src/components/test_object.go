@@ -1,10 +1,10 @@
-package comp
+package com
 
 import (
 	"image/color"
 	"math"
 
-	con "moonlander/constants"
+	sha "moonlander/src/shared"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -47,7 +47,7 @@ func (o *TestObject) Draw(screen *ebiten.Image) error {
 	if o.rectImg != nil {
 		// need to recreate image, because it changes shape (expensive only use for debug)
 		o.rectImg, _ = ebiten.NewImage(o.rect.w, o.rect.h, ebiten.FilterNearest)
-		o.rectImg.Fill(con.Cyan50)
+		o.rectImg.Fill(sha.Cyan50)
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(o.rect.x), float64(o.rect.y))
 		screen.DrawImage(o.rectImg, op)
@@ -117,7 +117,7 @@ func (o *TestObject) Collide(hitAbles []HitAble) error {
 		if &o.rect != &t.rect {
 			hit, sides := CheckHit(o.GetObject(), t, true, true)
 			if hit {
-				// fmt.Printf("%s hits %s on sides %+v\n", con.ID[o.ID], con.ID[t.ID], sides)
+				// fmt.Printf("%s hits %s on sides %+v\n", sha.ID[o.ID], sha.ID[t.ID], sides)
 				if t.solid {
 					o.addHit(t)
 					if sides.left {

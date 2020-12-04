@@ -1,4 +1,4 @@
-package comp
+package com
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	con "moonlander/constants"
+	sha "moonlander/src/shared"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
@@ -50,9 +50,9 @@ func init() {
 func NewTextBlock(x, y int) TextBlock {
 	// setup textboxes
 
-	gravity = NewText(0, 0, "", face, con.Blue)
-	laps = NewText(0, 30, "", face, con.Blue)
-	laptime = NewText(0, 60, "", face, con.Red)
+	gravity = NewText(0, 0, "", face, sha.Blue)
+	laps = NewText(0, 30, "", face, sha.Blue)
+	laptime = NewText(0, 60, "", face, sha.Red)
 	return TextBlock{x, y}
 }
 
@@ -60,23 +60,23 @@ func NewTextBlock(x, y int) TextBlock {
 func (o *TextBlock) Draw(screen *ebiten.Image) error {
 
 	// update laps
-	laps.text = "LAP: " + strconv.Itoa(LP.CurrentLap)
+	laps.text = "LAP: " + strconv.Itoa(sha.LP.CurrentLap)
 
 	// update lap laptime
-	if !LP.LapStartTime.IsZero() {
-		if LP.CurrentLap > LP.MaxLaps {
+	if !sha.LP.LapStartTime.IsZero() {
+		if sha.LP.CurrentLap > sha.LP.MaxLaps {
 			if endTimes == "" {
 				endTimes = calcEndTimes()
 			}
 			laptime.text = endTimes
 		} else {
-			et := getElapsedTime(LP.LapStartTime)
+			et := getElapsedTime(sha.LP.LapStartTime)
 			laptime.text = fmt.Sprintf("%02d:%02d.%03d", et.min, et.sec, et.ms)
 		}
 	}
 
 	// update Gravity value
-	gravity.text = fmt.Sprintf("%.2fG", (WP.Gravity * 60))
+	gravity.text = fmt.Sprintf("%.2fG", (sha.WP.Gravity * 60))
 
 	// draw
 	text.Draw(screen, gravity.text, face, o.x+gravity.x, o.y+gravity.y, laps.color)
@@ -84,6 +84,18 @@ func (o *TextBlock) Draw(screen *ebiten.Image) error {
 	text.Draw(screen, laptime.text, face, o.x+laptime.x, o.y+laptime.y, laptime.color)
 	return nil
 }
+
+// GetImageInfo implements Drawer
+func (o *TextBlock) GetImageInfo() (x, y, z float64, img *ebiten.Image) {
+	return 0, 0, 0, nil //stub
+}
+
+// GetImageRect implements Drawer
+// func (o *TextBlock) GetImageRect() image.Rectangle {
+// 	x, y := int(o.x), int(o.x)
+// 	w, h := 200, 200 //o.img.Size() TEMP
+// 	return image.Rect(x, y, x+w, y+h)
+// }
 
 // Get elapsed time from a start time
 func getElapsedTime(t time.Time) duration {
@@ -105,7 +117,7 @@ func fmtDuration(et time.Duration) duration {
 func calcEndTimes() string {
 	var str string
 	var tt time.Duration
-	for _, lt := range LP.LapTimes {
+	for _, lt := range sha.LP.LapTimes {
 		tt += lt
 		lap := fmtDuration(lt)
 		str += fmt.Sprintf("%02d:%02d.%03d\n", lap.min, lap.sec, lap.ms)

@@ -13,6 +13,8 @@ github.com/hajimehoshi/bitmapfont/v2 v2.0.1 h1:laWkLe/UODPdrs5Ce3DlHPnRvBWyju7uo
 github.com/hajimehoshi/bitmapfont/v2 v2.0.1/go.mod h1:2BnYrkTQGThpr/CY6LorYtt/zEPNzvE/ND69CRTaHMs=
 github.com/hajimehoshi/ebiten v1.13.0-alpha.0.20200924101858-567720ffb4de h1:scpXBlAKN5qtNybp0InBkkpjqripRy32VJV7hW1xuCk=
 github.com/hajimehoshi/ebiten v1.13.0-alpha.0.20200924101858-567720ffb4de/go.mod h1:3QugrIdpyYORTrGObLMlI2R8+4mIKU+wdDKIUuKMaWo=
+github.com/hajimehoshi/ebiten v1.13.0-alpha.0.20200929075539-0d2997929651 h1:yRtsTwRDgCpz2MSDkRSe6IlFrW8LHTlejhXf7FAOivw=
+github.com/hajimehoshi/ebiten v1.13.0-alpha.0.20200929075539-0d2997929651/go.mod h1:uiqmbt7koxVRHQZZJjh3sZIv0MgQtmUrC3942p9tsxs=
 github.com/hajimehoshi/file2byteslice v0.0.0-20200812174855-0e5e8a80490e/go.mod h1:CqqAHp7Dk/AqQiwuhV1yT2334qbA/tFWQW0MD2dGqUE=
 github.com/hajimehoshi/go-mp3 v0.3.1/go.mod h1:qMJj/CSDxx6CGHiZeCgbiq2DSUkbK0UbtXShQcnfyMM=
 github.com/hajimehoshi/oto v0.6.1/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=

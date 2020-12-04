@@ -1,4 +1,4 @@
-package comp
+package com
 
 import (
 	"github.com/hajimehoshi/ebiten"
@@ -16,14 +16,25 @@ func NewSprite(img *ebiten.Image, x, y, z int, v Vector) Sprite {
 	return Sprite{img, float64(x), float64(y), float64(z), v}
 }
 
-// Draw Sprite
+// Draw implements Drawer
 func (o *Sprite) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(o.x, o.y)
-	//op.GeoM.Scale(1, 1,2)
 	screen.DrawImage(o.img, op)
 	return nil
 }
+
+// GetImageInfo implements Drawer
+func (o *Sprite) GetImageInfo() (x, y, z float64, img *ebiten.Image) {
+	return  o.x, o.y, o.z, o.img
+}
+
+// GetImageRect implements Drawer
+// func (o *Sprite) GetImageRect() image.Rectangle {
+// 	x, y := int(o.x), int(o.x)
+// 	w, h := o.img.Size()
+// 	return image.Rect(x, y, x+w, y+h)
+// }
 
 // Update Sprite
 func (o *Sprite) Update(screen *ebiten.Image) error {

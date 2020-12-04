@@ -1,8 +1,9 @@
-package comp
+package com
 
 import (
 	"image/color"
 	"time"
+	sha "moonlander/src/shared"
 )
 
 // Finish is <dunno yet>
@@ -37,17 +38,17 @@ func (o *Finish) SetHit(collider Collider) {
 		// valid lap
 		if allHit {
 			// save duration's of laps
-			if !LP.LapStartTime.IsZero() {
-				duration := time.Now().Sub(LP.LapStartTime)
-				LP.LapTimes = append(LP.LapTimes, duration)
+			if !sha.LP.LapStartTime.IsZero() {
+				duration := time.Now().Sub(sha.LP.LapStartTime)
+				sha.LP.LapTimes = append(sha.LP.LapTimes, duration)
 			}
 
 			// set startTime of lap
-			LP.LapStartTime = time.Now()
+			sha.LP.LapStartTime = time.Now()
 
 			// increase currentLap
-			LP.CurrentLap++
-			if LP.CurrentLap > LP.MaxLaps {
+			sha.LP.CurrentLap++
+			if sha.LP.CurrentLap > sha.LP.MaxLaps {
 				o.finished = true
 			}
 

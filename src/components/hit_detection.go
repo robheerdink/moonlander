@@ -1,108 +1,6 @@
-package comp
+package com
 
-import (
-	"image/color"
-	"math"
-	"time"
-
-	"github.com/hajimehoshi/ebiten"
-)
-
-// common used variables in components, values change between levels
-var (
-	WP WorldProperties
-	LP LevelProperties
-)
-
-// common used constants in components
-const (
-	PI       float64 = math.Pi
-	DPI      float64 = math.Pi * 2
-	HPI      float64 = math.Pi / 2
-	RadToDeg float64 = 180 / math.Pi
-	DegToRad float64 = math.Pi / 180
-)
-
-// WorldProperties are properties of the world or level
-type WorldProperties struct {
-	Gravity     float64
-	Friction    float64
-	LevelWidth  int
-	LevelHeight int
-}
-
-// LevelProperties are used to store info / progress off the level
-type LevelProperties struct {
-	Lives        int
-	CurrentLap   int
-	MaxLaps      int
-	LapTimes     []time.Duration
-	LapStartTime time.Time
-	PX, PY       int
-}
-
-// Drawer can be drawn every frame
-type Drawer interface {
-	Draw(screen *ebiten.Image) error
-}
-
-// Updater can be updated every frame
-type Updater interface {
-	Update(screen *ebiten.Image) error
-}
-
-// HitAble something that can be hit / collided with
-type HitAble interface {
-	SetHit(collider Collider)
-	GetObject() *Object
-}
-
-// Collider checks collisions with HitAble's
-type Collider interface {
-	Collide(hitList []HitAble) error
-	GetObject() *Object
-}
-
-// Vector used for direction of objects
-type Vector struct {
-	x, y float64
-}
-
-// NewVector creates a Vector
-func NewVector(x, y float64) Vector {
-	return Vector{x, y}
-}
-
-//Rect as format x,y,w,h
-type Rect struct {
-	x, y, w, h int
-}
-
-//NewRect creates a Rect
-func NewRect(x, y, w, h int) Rect{
-	return Rect{x,y,w,h}
-}
-
-// setXY position of Rect
-func (r *Rect) setXY(x, y int) {
-	r.x = x
-	r.y = y
-}
-
-// HitShape is used for custom hit area for objects
-type HitShape struct {
-	rx, ry    int
-	rect      Rect
-	rectImg   *ebiten.Image
-	rectColor color.RGBA
-	Hit       bool
-	solid     bool
-}
-
-// Controls stuff (TODO should not be part of object)
-type Controls struct {
-	up, down, left, right, rr, rl bool
-}
+import "math"
 
 // Sides has a boolean for each side, to indicate collision on specific side('s)
 type Sides struct {
@@ -196,8 +94,6 @@ func GetRotatedPoint(cx, cy, ox, oy, rad float64) (x, y float64) {
 	ry := cy + (ox * math.Sin(rad)) + (oy * math.Cos(rad))
 	return rx, ry
 }
-
-
 
 // func GetFourRotatedPoints(cx, cy, ox, oy, rad float64) (x, y float64) {
 // 	rx := cx + (ox * math.Cos(rad)) - (oy * math.Sin(rad))

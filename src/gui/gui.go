@@ -1,9 +1,6 @@
 package gui
 
 import (
-	//"fmt"
-	//"image"
-
 	"image/color"
 	"log"
 

@@ -3,8 +3,7 @@ package gui
 import (
 	"fmt"
 	"image/color"
-
-	con "moonlander/constants"
+	sha "moonlander/src/shared"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
@@ -29,7 +28,7 @@ func ClearTitle() {
 func InitTitle() {
 	// create some buttons
 	w, h := 250, 100
-	x1, x2, x3, y := con.ScreenWidth/4-w/2, con.ScreenWidth/2-w/2, con.ScreenWidth/4*3-w/2, con.ScreenHeight/3-h/2
+	x1, x2, x3, y := sha.ScreenWidth/4-w/2, sha.ScreenWidth/2-w/2, sha.ScreenWidth/4*3-w/2, sha.ScreenHeight/3-h/2
 	btnColor := color.RGBA{0, 255, 0, 128}
 	txtColor := color.RGBA{0, 0, 0, 128}
 	btn1 := newButton("lvl01", "Level 1 Amazing!!", x1, y, w, h, fontNormal, btnColor, txtColor)

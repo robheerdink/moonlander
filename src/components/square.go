@@ -1,4 +1,4 @@
-package comp
+package com
 
 import (
 	"image/color"
@@ -15,9 +15,9 @@ func NewSquare(id, x, y, z int, v Vector, rx, ry, rw, rh int, c color.RGBA) Squa
 }
 
 // GetObject implements interface Collider
-func (o *Square) GetObject() *Object {
-	return &o.Object
-}
+// func (o *Square) GetObject() *Object {
+// 	return &o.Object
+// }
 
 // Collide implements interface Collider
 func (o *Square) Collide(hitAbles []HitAble) error {

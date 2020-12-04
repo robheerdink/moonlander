@@ -1,9 +1,9 @@
-package comp
+package com
 
 import (
 	"image/color"
 
-	con "moonlander/constants"
+	sha "moonlander/src/shared"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -21,7 +21,7 @@ func NewObject(id int, img *ebiten.Image, x, y, z int, v Vector, rx, ry, rw, rh 
 
 	// hit rect image (centered in image)
 	rectImg, _ := ebiten.NewImage(rw, rh, ebiten.FilterNearest)
-	rectImg.Fill(con.Red50)
+	rectImg.Fill(sha.Red50)
 	if img == nil {
 		// create visual image, when bitmap is nil
 		// the size of the image is hit rect + the offsets on both sides

@@ -1,4 +1,4 @@
-package comp
+package com
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"math"
 
 	ass "moonlander/assets"
-	con "moonlander/constants"
+	sha "moonlander/src/shared"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -22,6 +22,11 @@ type Player struct {
 	collideObject                 *Object
 	Object
 	Controls
+}
+
+// Controls stuff
+type Controls struct {
+	up, down, left, right, rr, rl bool
 }
 
 // NewPlayer constructor
@@ -75,13 +80,13 @@ func (o *Player) Draw(screen *ebiten.Image) error {
 		// draw hit shape (need to recreate image, because it changes shape)
 		if o.rectImg != nil {
 			o.rectImg, _ = ebiten.NewImage(o.rect.w, o.rect.h, ebiten.FilterNearest)
-			o.rectImg.Fill(con.Cyan25)
+			o.rectImg.Fill(sha.Cyan25)
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(o.rect.x), float64(o.rect.y))
 			screen.DrawImage(o.rectImg, op)
 		}
 	}
-	
+
 	// draw Player related info
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f\nx : %0.2f\ny : %0.2f\nz : %0.2f\nv : %0.4f",
 		ebiten.CurrentTPS(), o.x, o.y, o.z, o.vector))
@@ -180,28 +185,28 @@ func (o *Player) Update(screen *ebiten.Image) error {
 		if o.z > 0.01 && o.z < PI {
 			if o.z < HPI {
 				// go nose up
-				o.z -= (WP.Gravity / 6) * ((HPI - o.z) / HPI)
+				o.z -= (sha.WP.Gravity / 6) * ((HPI - o.z) / HPI)
 			} else {
 				// go nose down
-				o.z += (WP.Gravity / 4) * ((HPI - o.z) / HPI) * -1
+				o.z += (sha.WP.Gravity / 4) * ((HPI - o.z) / HPI) * -1
 			}
 		}
 		if o.z < DPI-0.01 && o.z > PI {
 			if o.z < (PI * 1.5) {
 				// go nose down
-				o.z -= (WP.Gravity / 4) * ((PI/2*3 - o.z) / HPI)
+				o.z -= (sha.WP.Gravity / 4) * ((PI/2*3 - o.z) / HPI)
 			} else {
 				// go nose up
-				o.z += (WP.Gravity / 6) * ((PI/2*3 - o.z) / HPI) * -1
+				o.z += (sha.WP.Gravity / 6) * ((PI/2*3 - o.z) / HPI) * -1
 			}
 		}
 
 		//add 'atmosphere' friction
-		o.vector.x *= WP.Friction * o.weight
-		o.vector.y *= WP.Friction * o.weight
+		o.vector.x *= sha.WP.Friction * o.weight
+		o.vector.y *= sha.WP.Friction * o.weight
 
 		// add gravity
-		o.vector.y += WP.Gravity * o.weight
+		o.vector.y += sha.WP.Gravity * o.weight
 	}
 
 	// update player position
@@ -246,7 +251,7 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 		if &o.rect != &t.rect {
 			hit, sides := CheckHit(o.GetObject(), t, true, true)
 			if hit {
-				//fmt.Printf("%s hits %s on sides %+v\n", con.ID[o.ID], con.ID[t.ID], sides)
+				//fmt.Printf("%s hits %s on sides %+v\n", sha.ID[o.ID], sha.ID[t.ID], sides)
 				o.addHit(t)
 
 				// player hits somehting solid
@@ -261,7 +266,7 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 					}
 					if sides.top {
 						// if we hit a wall, set player to grounded and set on top block, without offset
-						if t.id == con.IDWall && !o.grounded {
+						if t.id == sha.IDWall && !o.grounded {
 							o.y = float64(t.rect.y - o.rect.h - o.ry)
 							o.grounded = true
 						} else {
@@ -274,9 +279,9 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 						o.vector.y = 0
 					}
 				} else {
-					if t.id == con.IDCheckpoint {
+					if t.id == sha.IDCheckpoint {
 						h.SetHit(o)
-					} else if t.id == con.IDFinish {
+					} else if t.id == sha.IDFinish {
 						h.SetHit(o)
 					}
 				}
@@ -288,8 +293,8 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 }
 
 func (o *Player) reset() {
-	o.x = float64(LP.PX)
-	o.y = float64(LP.PY)
+	o.x = float64(sha.LP.PX)
+	o.y = float64(sha.LP.PY)
 	o.z = 0
 	o.vector.x = 0
 	o.vector.y = 0
