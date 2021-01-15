@@ -29,13 +29,6 @@ func (o *Sprite) GetImageInfo() (x, y, z float64, img *ebiten.Image) {
 	return  o.x, o.y, o.z, o.img
 }
 
-// GetImageRect implements Drawer
-// func (o *Sprite) GetImageRect() image.Rectangle {
-// 	x, y := int(o.x), int(o.x)
-// 	w, h := o.img.Size()
-// 	return image.Rect(x, y, x+w, y+h)
-// }
-
 // Update Sprite
 func (o *Sprite) Update(screen *ebiten.Image) error {
 	o.x += o.vector.x

@@ -9,29 +9,7 @@ go get github.com/hajimehoshi/ebiten@master
 #############################################
 # TODO
 #############################################
-- camera
-    
-    would first need to draw everything in world (offscreen?)
-    and use the camera to move the screen
-    movement should be controlled by player
-    camera ussually centers on player, except when you get to level BoundString
-
-    https://github.com/hajimehoshi/ebiten/blob/master/examples/camera/main.go
-    g.world.DrawImage(tilesImage.SubImage(image.Rect(sx, sy, sx+tileSize, sy+tileSize)).(*ebiten.Image), op)
-    this uses subImage and the tilesImage already has all the contains all images (texture atlas)
-    I would need to switch to Tiled for level creation and creating the texture atlas
-    Think about how to still draw dynamicly, spawn stuff in which is not in level
-    https://github.com/hajimehoshi/ebiten/blob/master/examples/tiles/main.go
-
-
-    How would you draw images on a other image as a composition?
-    basicly just as we do for screen, but then we want a world composition image
-    https://pkg.go.dev/github.com/hajimehoshi/ebiten#Image.DrawImage
-    basicly just dont draw it on screen, but on world and draw world on screen
-
-    https://pkg.go.dev/github.com/hajimehoshi/ebiten#GeoM.Concat
-    
-
+- need to seperate draw in world and draw on screen for gui
 
 - if we have scrolling levels, we need better way to create levels
     - tiled?
@@ -40,8 +18,8 @@ go get github.com/hajimehoshi/ebiten@master
     - think about stuff which uses a lot of tiles, like a thin finish line
     - use sub image drawing, we would need to add hit objects 'under' the drawing
     - do we want to remove or destroy the level layer?
-- make background components, which stretches image to screen 
-- make background which loop-able with a camera
+
+- make background which is loopable
 - make fuel mechanic's
 - add limited nr of lives
 - add damage

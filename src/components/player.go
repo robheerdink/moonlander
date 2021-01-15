@@ -185,28 +185,28 @@ func (o *Player) Update(screen *ebiten.Image) error {
 		if o.z > 0.01 && o.z < PI {
 			if o.z < HPI {
 				// go nose up
-				o.z -= (sha.WP.Gravity / 6) * ((HPI - o.z) / HPI)
+				o.z -= (sha.LP.Gravity / 6) * ((HPI - o.z) / HPI)
 			} else {
 				// go nose down
-				o.z += (sha.WP.Gravity / 4) * ((HPI - o.z) / HPI) * -1
+				o.z += (sha.LP.Gravity / 4) * ((HPI - o.z) / HPI) * -1
 			}
 		}
 		if o.z < DPI-0.01 && o.z > PI {
 			if o.z < (PI * 1.5) {
 				// go nose down
-				o.z -= (sha.WP.Gravity / 4) * ((PI/2*3 - o.z) / HPI)
+				o.z -= (sha.LP.Gravity / 4) * ((PI/2*3 - o.z) / HPI)
 			} else {
 				// go nose up
-				o.z += (sha.WP.Gravity / 6) * ((PI/2*3 - o.z) / HPI) * -1
+				o.z += (sha.LP.Gravity / 6) * ((PI/2*3 - o.z) / HPI) * -1
 			}
 		}
 
 		//add 'atmosphere' friction
-		o.vector.x *= sha.WP.Friction * o.weight
-		o.vector.y *= sha.WP.Friction * o.weight
+		o.vector.x *= sha.LP.Friction * o.weight
+		o.vector.y *= sha.LP.Friction * o.weight
 
 		// add gravity
-		o.vector.y += sha.WP.Gravity * o.weight
+		o.vector.y += sha.LP.Gravity * o.weight
 	}
 
 	// update player position
@@ -293,8 +293,8 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 }
 
 func (o *Player) reset() {
-	o.x = float64(sha.LP.PX)
-	o.y = float64(sha.LP.PY)
+	o.x = float64(sha.LP.PlayerStartX)
+	o.y = float64(sha.LP.PlayerStartY)
 	o.z = 0
 	o.vector.x = 0
 	o.vector.y = 0

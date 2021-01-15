@@ -76,7 +76,7 @@ func (o *TextBlock) Draw(screen *ebiten.Image) error {
 	}
 
 	// update Gravity value
-	gravity.text = fmt.Sprintf("%.2fG", (sha.WP.Gravity * 60))
+	gravity.text = fmt.Sprintf("%.2fG", (sha.LP.Gravity * 60))
 
 	// draw
 	text.Draw(screen, gravity.text, face, o.x+gravity.x, o.y+gravity.y, laps.color)

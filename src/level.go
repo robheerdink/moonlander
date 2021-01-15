@@ -43,13 +43,11 @@ func LoadLevel(name string) {
 	// common for all levels
 	preloadImages()
 
-	sha.WP = sha.WorldProperties{
-		Gravity:     0.000,
-		Friction:    0.992,
-		LevelWidth:  1150,
-		LevelHeight: 864,
-	}
 	sha.LP = sha.LevelProperties{
+		Gravity:    0.000,
+		Friction:   0.992,
+		Width:      1150,
+		Height:     864,
 		Lives:      3,
 		CurrentLap: 0,
 		MaxLaps:    3,
@@ -57,16 +55,12 @@ func LoadLevel(name string) {
 	}
 
 	// some abbrivations
-	LW := int(sha.WP.LevelWidth)
-	LH := int(sha.WP.LevelHeight)
-	HLW := int(LW / 2)
-	HLH := int(LH / 2)
 	V := com.Vector{}
 	var size int = 16
 	var cpSize int = 4
 
-	bg := com.NewSprite(background, 0, 0, 0, V)
-	tb := com.NewTextBlock(LW-150, 50)
+	//bg := com.NewSprite(background, 0, 0, 0, V)
+	tb := com.NewTextBlock(sha.LP.Width-150, 50)
 	px, py := 0, 0
 
 	img, _, err := image.Decode(bytes.NewReader(ass.Runner_png))
@@ -75,10 +69,15 @@ func LoadLevel(name string) {
 	}
 
 	if name == "lvl01" {
+		sha.LP.Gravity = 0.015
+		sha.LP.Width = sha.ScreenWidth * 2
+		sha.LP.Height = sha.ScreenHeight * 2
+		LW, LH, HLW, HLH := getLevelDimensionsInt()
+		SetWorldImage(LW, LH)
+
+		bg := com.NewBackground(background, 0, 0, 0, LW, LH, V)
 		runnerImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterDefault)
 		anim := com.NewAnim(runnerImage, 200, 200, 0, V, com.NewFrame(0, 32, 32, 32, 8, 5))
-
-		sha.WP.Gravity = 0.015
 		px, py = HLW-300, HLH+100
 		player = com.NewPlayer(sha.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, sha.Red50)
 		cp1 := com.NewCheckpoint(sha.IDCheckpoint, HLW-cpSize, HLH-cpSize/2, HLW, cpSize, sha.Cyan25, true)
@@ -89,10 +88,10 @@ func LoadLevel(name string) {
 		wallL := com.NewWall(sha.IDWall, 0, size, size, LH-size, sha.Blue50)
 		wallB := com.NewWall(sha.IDWall, size, LH-size, LW-size, size, sha.Blue50)
 		wallR := com.NewWall(sha.IDWall, LW-size, 0, size, LH-size, sha.Blue50)
-		wallCL := com.NewWall(sha.IDWall, 200, HLH-size/2, HLW-200, size, sha.Cyan50)
-		wallCR := com.NewWall(sha.IDWall, HLW, HLH-size/2, HLW-200, size, sha.Yellow50)
-		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 200-size/2, size, HLH-200, sha.Green50)
-		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-200, sha.Purple50)
+		wallCL := com.NewWall(sha.IDWall, 300, HLH-size/2, HLW-300, size, sha.Cyan50)
+		wallCR := com.NewWall(sha.IDWall, HLW, HLH-size/2, HLW-300, size, sha.Yellow50)
+		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 300-size/2, size, HLH-300, sha.Green50)
+		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-300, sha.Purple50)
 		// add to interface lists
 		DrawList = append(DrawList, &bg, &anim, &tb, &player, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		HitAbleList = append(HitAbleList, &player, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
@@ -101,27 +100,39 @@ func LoadLevel(name string) {
 		//spwanRandomSquares(HitAbleList, 2, 50)
 
 	} else if name == "lvl02" {
-		sha.WP.Gravity = 0.00
+		sha.LP.Gravity = 0.015
+		sha.LP.Width = sha.ScreenWidth * 2
+		sha.LP.Height = sha.ScreenHeight
+		LW, LH, HLW, HLH := getLevelDimensionsInt()
+		SetWorldImage(LW, LH)
+
+		bg := com.NewBackground(background, 0, 0, 0, LW, LH, V)
 		px, py = HLW-300, HLH+100
-		player := com.NewPlayer(sha.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, sha.Red50)
+		player = com.NewPlayer(sha.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, sha.Red50)
 		tester := com.NewCollideTest(sha.IDTester, HLW-100, HLH+100, 0, V, 4, 4, 24, 56, sha.Green50)
 		wallT := com.NewWall(sha.IDWall, 0, 0, LW-size, size, sha.Blue50)
 		wallL := com.NewWall(sha.IDWall, 0, size, size, LH-size, sha.Blue50)
 		wallB := com.NewWall(sha.IDWall, size, LH-size, LW-size, size, sha.Blue50)
 		wallR := com.NewWall(sha.IDWall, LW-size, 0, size, LH-size, sha.Blue50)
-		wallCL := com.NewWall(sha.IDWall, 200, HLH-size/2, HLW-200, size, sha.Cyan50)
-		wallCR := com.NewWall(sha.IDWall, HLW, HLH-size/2, HLW-200, size, sha.Yellow50)
-		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 200-size/2, size, HLH-200, sha.Green50)
-		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-200, sha.Purple50)
+		wallCL := com.NewWall(sha.IDWall, 300, HLH-size/2, HLW-300, size, sha.Cyan50)
+		wallCR := com.NewWall(sha.IDWall, HLW, HLH-size/2, HLW-300, size, sha.Yellow50)
+		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 300-size/2, size, HLH-300, sha.Green50)
+		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-300, sha.Purple50)
 		// add to interface lists
 		DrawList = append(DrawList, &bg, &tb, &player, &tester, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		HitAbleList = append(HitAbleList, &player, &tester, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		UpdateList = append(UpdateList, &player, &tester)
 		CollideList = append(CollideList, &player, &tester)
-		spwanRandomSquares(HitAbleList, 500, 8)
+		spwanRandomSquares(HitAbleList, 8, 50)
 
 	} else if name == "lvl03" {
-		sha.WP.Gravity = 0.04
+		sha.LP.Gravity = 0.04
+		sha.LP.Width = sha.ScreenWidth
+		sha.LP.Height = sha.ScreenHeight
+		LW, LH, HLW, HLH := getLevelDimensionsInt()
+		SetWorldImage(LW, LH)
+
+		bg := com.NewBackground(background, 0, 0, 0, LW, LH, V)
 		px, py = HLW, HLH+100
 		player = com.NewPlayer(sha.IDPlayer, spaceShip, px, py, 0, V, 8, 8, 30, 48, sha.Red50)
 		tester := com.NewCollideTest(sha.IDTester, HLW-100, HLH+100, 0, V, 4, 4, 24, 56, sha.Green50)
@@ -138,8 +149,8 @@ func LoadLevel(name string) {
 	}
 
 	// update player position
-	sha.LP.PX = px
-	sha.LP.PY = py
+	sha.LP.PlayerStartX = px
+	sha.LP.PlayerStartY = py
 }
 
 func preloadImages() {
@@ -172,9 +183,15 @@ func spwanRandomSquares(list []com.HitAble, count, size int) {
 	}
 }
 
+func getLevelDimensionsInt() (int, int, int, int) {
+	LW := int(sha.LP.Width)
+	LH := int(sha.LP.Height)
+	return LW, LH, int(LW / 2), int(LH / 2)
+}
+
 func getRandonPosition(offsetX, offsetY, space int, dontOverlap []com.HitAble) (int, int) {
-	x := rand.Intn(int(sha.WP.LevelWidth)-(offsetX*2)) + offsetX
-	y := rand.Intn(int(sha.WP.LevelHeight)-(offsetY*2)) + offsetY
+	x := rand.Intn(int(sha.LP.Width)-(offsetX*2)) + offsetX
+	y := rand.Intn(int(sha.LP.Height)-(offsetY*2)) + offsetY
 	r := com.NewRect(x, y, space, space)
 	for _, o := range dontOverlap {
 		if o.GetObject().GetSolid() {

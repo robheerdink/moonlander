@@ -61,15 +61,20 @@ func DrawTitle(screen *ebiten.Image) {
 	text.Draw(screen, sampleText, fontNormal, 20, 120, color.White)
 
 	text.Draw(screen, ""+
-		"up        = Move up (main engines)\n"+
-		"right     = Move right\n"+
-		"left      = Move left\n"+
-		"down      = Move down\n"+
-		"z         = rotate left\n"+
-		"x         = rotat right\n\n"+
-		"backspace = reset player\n"+
-		"esc       = main menu \n"+
-		"tester    = WSAD + QE", fontArcade, 200, 450, color.White)
+		"main menu     = esc \n\n"+
+		"Move up       = up\n"+
+		"Move right    = right\n"+
+		"Move left     = left\n"+
+		"Move down     = down\n"+
+		"rotate left   = z\n"+
+		"rotate right  = x\n"+
+		"reset player  = backspace\n\n"+
+		"camera move   = WSAD\n"+
+		"camera rotate = Q/E\n"+
+		"camera zoom   = SHIFT/CONTROL\n"+
+		"camera reset  = SPACE\n\n"+
+		"test obj      = T,G,F,H,R,Y",
+		fontArcade, 200, 450, color.White)
 
 	// draw all buttons
 	for _, btn := range btnList {

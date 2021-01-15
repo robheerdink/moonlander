@@ -62,7 +62,7 @@ func init() {
 		Hinting: font.HintingFull,
 	})
 	fontArcade = truetype.NewFace(ar, &truetype.Options{
-		Size:    24,
+		Size:    16,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})

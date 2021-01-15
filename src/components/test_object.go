@@ -63,22 +63,22 @@ func (o *TestObject) Update(screen *ebiten.Image) error {
 	o.vector.x *= 0.9
 	o.vector.y *= 0.9
 
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
+	if ebiten.IsKeyPressed(ebiten.KeyT) {
 		o.vector.y = o.speed * -1
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyS) {
+	if ebiten.IsKeyPressed(ebiten.KeyG) {
 		o.vector.y = o.speed
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
+	if ebiten.IsKeyPressed(ebiten.KeyF) {
 		o.vector.x = o.speed * -1
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyD) {
+	if ebiten.IsKeyPressed(ebiten.KeyH) {
 		o.vector.x = o.speed
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+	if ebiten.IsKeyPressed(ebiten.KeyR) {
 		o.z -= (o.speed * 2) * DegToRad
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyE) {
+	if ebiten.IsKeyPressed(ebiten.KeyY) {
 		o.z += (o.speed * 2) * DegToRad
 	}
 	if math.Abs(o.z) > DPI {
