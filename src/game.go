@@ -85,19 +85,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case ModeTitle:
 		gui.DrawTitle(screen)
 	case ModeGame:
-
 		// draw in world
-		for _, i := range DrawList {
+		for _, i := range DrawWorldList {
 			i.Draw(g.world)
 		}
-
-		// draw world to screen
-		// op := &ebiten.DrawImageOptions{}
-		// screen.DrawImage(g.world, op)
-
 		// render world in camera
 		g.camera.Render(g.world, screen)
 
+		// draw on screen (gui)
+		for _, i := range DrawScreenList {
+			i.Draw(screen)
+		}
 	case ModeGameOver:
 		gui.DrawGameOver(screen)
 	}

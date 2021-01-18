@@ -105,7 +105,7 @@ func (c *Camera) Update() error {
 		c.Position[1] = y - sha.ScreenHeight/2
 
 		//fmt.Println(x, y)
-		fmt.Println(c, panCamera)
+		//fmt.Println(c, panCamera)
 	}
 
 	// set level bounds

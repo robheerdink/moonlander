@@ -18,20 +18,22 @@ import (
 
 // Variables related to level
 var (
-	background  *ebiten.Image
-	spaceShip   *ebiten.Image
-	player      com.Player
-	DrawList    []com.Drawer
-	HitAbleList []com.HitAble
-	UpdateList  []com.Updater
-	CollideList []com.Collider
+	background     *ebiten.Image
+	spaceShip      *ebiten.Image
+	player         com.Player
+	DrawWorldList       []com.Drawer
+	DrawScreenList []com.Drawer
+	HitAbleList    []com.HitAble
+	UpdateList     []com.Updater
+	CollideList    []com.Collider
 )
 
 // ClearLevel clears are references from level
 func ClearLevel() {
 	background = nil
 	spaceShip = nil
-	DrawList = nil
+	DrawWorldList = nil
+	DrawScreenList = nil
 	HitAbleList = nil
 	UpdateList = nil
 	CollideList = nil
@@ -93,7 +95,8 @@ func LoadLevel(name string) {
 		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 300-size/2, size, HLH-300, sha.Green50)
 		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-300, sha.Purple50)
 		// add to interface lists
-		DrawList = append(DrawList, &bg, &anim, &tb, &player, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		DrawWorldList = append(DrawWorldList, &bg, &anim, &player, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		DrawScreenList = append(DrawScreenList, &tb)
 		HitAbleList = append(HitAbleList, &player, &finish, &cp1, &cp2, &cp3, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		UpdateList = append(UpdateList, &player, &anim)
 		CollideList = append(CollideList, &player)
@@ -119,7 +122,7 @@ func LoadLevel(name string) {
 		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 300-size/2, size, HLH-300, sha.Green50)
 		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-300, sha.Purple50)
 		// add to interface lists
-		DrawList = append(DrawList, &bg, &tb, &player, &tester, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
+		DrawWorldList = append(DrawWorldList, &bg, &tb, &player, &tester, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		HitAbleList = append(HitAbleList, &player, &tester, &wallT, &wallL, &wallB, &wallR, &wallCL, &wallCR, &wallCT, &wallCB)
 		UpdateList = append(UpdateList, &player, &tester)
 		CollideList = append(CollideList, &player, &tester)
@@ -142,7 +145,7 @@ func LoadLevel(name string) {
 		wallCT := com.NewWall(sha.IDWall, HLW-size/2, 400-size/2, size, HLH-400, sha.Green50)
 		wallCB := com.NewWall(sha.IDWall, HLW-size/2, HLH+size/2, size, HLH-400, sha.Purple50)
 		// add to interface lists
-		DrawList = append(DrawList, &bg, &tb, &player, &tester, &wallB, &wallCL, &wallCR, &wallCT, &wallCB)
+		DrawWorldList = append(DrawWorldList, &bg, &tb, &player, &tester, &wallB, &wallCL, &wallCR, &wallCT, &wallCB)
 		HitAbleList = append(HitAbleList, &player, &tester, &wallB, &wallCL, &wallCR, &wallCT, &wallCB)
 		UpdateList = append(UpdateList, &player, &tester)
 		CollideList = append(CollideList, &player, &tester)
@@ -175,7 +178,7 @@ func spwanRandomSquares(list []com.HitAble, count, size int) {
 		vy := float64(choices[rand.Int()%len(choices)])
 		s := com.NewSquare(sha.IDSquare, x, y, 0, com.NewVector(vx, vy), 0, 0, size, size, sha.Purple50)
 		// add Square to interface lists
-		DrawList = append(DrawList, &s)
+		DrawWorldList = append(DrawWorldList, &s)
 		UpdateList = append(UpdateList, &s)
 		CollideList = append(CollideList, &s)
 		HitAbleList = append(HitAbleList, &s)

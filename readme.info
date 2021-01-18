@@ -9,7 +9,6 @@ go get github.com/hajimehoshi/ebiten@master
 #############################################
 # TODO
 #############################################
-- need to seperate draw in world and draw on screen for gui
 
 - if we have scrolling levels, we need better way to create levels
     - tiled?
