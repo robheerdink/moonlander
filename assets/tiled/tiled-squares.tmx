@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="11">
+ <tileset firstgid="1" source="tilesets/squares.tsx"/>
+ <layer id="1" name="layer1" width="40" height="30">
+  <properties>
+   <property name="test" value="jope is dope"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzt1tEKgCAMheFhmb3/E8cuJBGHxMk61n7YRUXwMZAKIrIQTxDeopy++CbEqPTla6ZqX77HUsvHlPuwZvbtxjzZzPtjyH1YX/eh53ntPEd9CXhXcx/WX316LlJjrp6X0fvLoXu0ch/WXb5R/12zfN9YjaWP0Vj72Iwtn85GMuo7APteAu4=
+  </data>
+ </layer>
+ <layer id="4" name="layer2" width="40" height="30">
+  <properties>
+   <property name="test" value="aap"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzt1CEOACAMBMEq/v9kFA5oU3MX2EkQFLOCNOJ9o3lUfae5Q1/2ruzL3p36dndlX2W25uo+RUOV+q/duO29Tpt6/zn2AQAAAL+YaMUCaw==
+  </data>
+ </layer>
+ <objectgroup id="5" name="layer3">
+  <object id="2" name="wall" type="wall" x="0" y="0" width="1280" height="32"/>
+  <object id="5" name="wall" type="wall" x="0" y="928" width="1280" height="32"/>
+  <object id="7" name="wall" type="wall" x="0" y="32" width="32" height="898"/>
+  <object id="8" name="wall" type="wall" x="1248" y="32" width="32" height="898"/>
+  <object id="9" name="player1" type="player" x="581.23" y="518.935" width="32" height="32"/>
+  <object id="10" name="asteroid" type="enemy" x="731.404" y="519.875" width="32" height="32"/>
+ </objectgroup>
+</map>

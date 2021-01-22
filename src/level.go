@@ -3,9 +3,12 @@ package src
 import (
 	//"image/color"
 	"bytes"
+	"fmt"
 	"image"
 	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"time"
 
 	ass "moonlander/assets"
@@ -14,6 +17,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/lafriks/go-tiled"
 )
 
 // Variables related to level
@@ -21,12 +25,14 @@ var (
 	background     *ebiten.Image
 	spaceShip      *ebiten.Image
 	player         com.Player
-	DrawWorldList       []com.Drawer
+	DrawWorldList  []com.Drawer
 	DrawScreenList []com.Drawer
 	HitAbleList    []com.HitAble
 	UpdateList     []com.Updater
 	CollideList    []com.Collider
 )
+
+const mapPath = "assets/tiled/tiled-squares.tmx" // Path to your Tiled Map.
 
 // ClearLevel clears are references from level
 func ClearLevel() {
@@ -39,8 +45,57 @@ func ClearLevel() {
 	CollideList = nil
 }
 
+func mapIndex(x, y int, m *tiled.Map) int {
+	return x + y*m.Width
+}
+
+func mapXY(index int, m *tiled.Map) (int, int) {
+	x := index % m.Width
+	y := int(index / m.Width)
+	return x, y
+}
+
+// LoadTMX loads a level with format TMX (tiled)
+func LoadTMX(mapPath string) {
+
+	// Parse .tmx file.
+	m, err := tiled.LoadFromFile(mapPath)
+	if err != nil {
+		fmt.Printf("error parsing map: %s", err.Error())
+		os.Exit(2)
+	}
+	// loop through tile layers
+	for _, layer := range m.Layers {
+		fmt.Println(layer.Name)
+		for i, tile := range layer.Tiles {
+			//tx, ty := mapXY(i, m)
+			x, y := layer.GetTilePosition(i)
+			if tile.Tileset != nil {
+				levelItem(strconv.FormatUint(uint64(tile.ID), 10), "", x, y, m.TileWidth, m.TileHeight, 0, tile.Tileset.Tiles[tile.ID].Properties)
+			}
+		}
+	}
+	// loop through object layers
+	for _, objLayer := range m.ObjectGroups {
+		fmt.Println(objLayer.Name)
+		for _, obj := range objLayer.Objects {
+			levelItem(obj.Type, obj.Name, int(obj.X), int(obj.Y), int(obj.Width), int(obj.Height), int(obj.Rotation), obj.Properties)
+		}
+	}
+}
+
+func levelItem(id, name string, x, y, w, h, rotation int, prop tiled.Properties) {
+	/* id   = object.type or tile.id
+	   name = object.name or nil
+	*/
+	fmt.Println(id, name, x, y, w, h, rotation, prop)
+
+}
+
 // LoadLevel loads a specific level
 func LoadLevel(name string) {
+
+	LoadTMX("assets/tiled/tiled-squares.tmx")
 
 	// common for all levels
 	preloadImages()

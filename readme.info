@@ -10,6 +10,13 @@ go get github.com/hajimehoshi/ebiten@master
 # TODO
 #############################################
 
+
+https://www.mapeditor.org/
+https://github.com/lafriks/go-tiled
+https://pkg.go.dev/github.com/lafriks/go-tiled
+
+
+
 - if we have scrolling levels, we need better way to create levels
     - tiled?
     - array?
