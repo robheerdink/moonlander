@@ -18,27 +18,32 @@ const (
 
 // Drawer can be drawn every frame
 type Drawer interface {
-	// Draw in screen
+	GetID() (id int)
+	GetInfo() (id int, name string, x, y, r float64, w, h int)
 	Draw(screen *ebiten.Image) error
-	// Draw in world
-	GetImageInfo() (x, y, z float64, img *ebiten.Image)
 }
 
 // Updater can be updated every frame
 type Updater interface {
+	GetID() (id int)
+	GetInfo() (id int, name string, x, y, r float64, w, h int)
 	Update(screen *ebiten.Image) error
 }
 
 // HitAble something that can be hit / collided with
 type HitAble interface {
-	SetHit(collider Collider)
+	GetID() (id int)
+	GetInfo() (id int, name string, x, y, r float64, w, h int)
 	GetObject() *Object
+	SetHit(collider Collider)
 }
 
 // Collider checks collisions with HitAble's
 type Collider interface {
-	Collide(hitList []HitAble) error
+	GetID() (id int)
+	GetInfo() (id int, name string, x, y, r float64, w, h int)
 	GetObject() *Object
+	Collide(hitList []HitAble) error
 }
 
 // Vector used for direction of objects

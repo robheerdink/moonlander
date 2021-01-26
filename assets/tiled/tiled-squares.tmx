@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="11">
+ <properties>
+  <property name="friction" value="0.996"/>
+  <property name="gravity" value="0.3"/>
+  <property name="maxLaps" value="3"/>
+ </properties>
  <tileset firstgid="1" source="tilesets/squares.tsx"/>
  <layer id="1" name="layer1" width="40" height="30">
   <properties>

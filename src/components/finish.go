@@ -9,7 +9,7 @@ import (
 // Finish is <dunno yet>
 type Finish struct {
 	Object
-	checkpoints []*Checkpoint
+	Checkpoints []*Checkpoint
 	finished    bool
 }
 
@@ -17,7 +17,7 @@ type Finish struct {
 func NewFinish(id, x, y, w, h int, c color.RGBA, checkpoints []*Checkpoint) Finish {
 	return Finish{
 		Object:      NewObject(id, nil, x, y, 0, Vector{}, 0, 0, w, h, false, c),
-		checkpoints: checkpoints,
+		Checkpoints: checkpoints,
 	}
 }
 
@@ -28,7 +28,7 @@ func (o *Finish) SetHit(collider Collider) {
 
 		// check if we passed all checkpoints
 		allHit := true
-		for _, cp := range o.checkpoints {
+		for _, cp := range o.Checkpoints {
 			if !cp.done {
 				allHit = false
 				break
@@ -53,7 +53,7 @@ func (o *Finish) SetHit(collider Collider) {
 			}
 
 			// reset checkpoint
-			for _, cp := range o.checkpoints {
+			for _, cp := range o.Checkpoints {
 				cp.done = false
 				cp.Hit = false
 			}

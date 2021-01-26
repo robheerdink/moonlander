@@ -29,7 +29,7 @@ func NewAnim(img *ebiten.Image, x, y, z int, v Vector, frame Frame) Anim {
 	return Anim{
 		count:  0,
 		frame:  frame,
-		Sprite: NewSprite(img, x, y, z, v),
+		Sprite: NewSprite(0, img, x, y, z, v),
 	}
 }
 
@@ -55,12 +55,12 @@ func (o *Anim) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 
 	op.GeoM.Translate(-float64(o.frame.w)/2, -float64(o.frame.h)/2)
-	op.GeoM.Rotate(o.z)
-	op.GeoM.Translate(o.x, o.y)
+	op.GeoM.Rotate(o.R)
+	op.GeoM.Translate(o.X, o.Y)
 
 	i := (o.count / o.frame.delay) % o.frame.num
 	sx, sy := o.frame.x+i*o.frame.w, o.frame.y
 
-	screen.DrawImage(o.img.SubImage(image.Rect(sx, sy, sx+o.frame.w, sy+o.frame.h)).(*ebiten.Image), op)
+	screen.DrawImage(o.Img.SubImage(image.Rect(sx, sy, sx+o.frame.w, sy+o.frame.h)).(*ebiten.Image), op)
 	return nil
 }

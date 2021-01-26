@@ -85,17 +85,15 @@ func (o *TextBlock) Draw(screen *ebiten.Image) error {
 	return nil
 }
 
-// GetImageInfo implements Drawer
-func (o *TextBlock) GetImageInfo() (x, y, z float64, img *ebiten.Image) {
-	return 0, 0, 0, nil //stub
+// GetID implements interface, returns the id
+func (o *TextBlock) GetID() int {
+	return 0
 }
 
-// GetImageRect implements Drawer
-// func (o *TextBlock) GetImageRect() image.Rectangle {
-// 	x, y := int(o.x), int(o.x)
-// 	w, h := 200, 200 //o.img.Size() TEMP
-// 	return image.Rect(x, y, x+w, y+h)
-// }
+// GetInfo implements interface, returns info for debugging
+func (o *TextBlock) GetInfo() (id int, name string, x, y, r float64, w, h int) {
+	return 0, sha.Name[0], float64(o.x), float64(o.y), 0, 0, 0
+}
 
 // Get elapsed time from a start time
 func getElapsedTime(t time.Time) duration {

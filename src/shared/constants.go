@@ -31,25 +31,28 @@ var (
 	White25  = color.RGBA{255, 255, 255, 64}
 
 	// translate ids to name string
-	ID = map[int]string{
+	Name = map[int]string{
+		0: "unknown",
 		1: "player",
-		2: "square",
-		3: "wall",
-		4: "tester",
-		5: "finish",
-		6: "checkpoint",
+		2: "background",
+		3: "square",
+		4: "wall",
+		5: "tester",
+		6: "finish",
+		7: "checkpoint",
 	}
 )
 
 // Constants
 const (
-	ScreenWidth  = 1150
-	ScreenHeight = 864
+	ScreenWidth  = 1280 //40 * 32
+	ScreenHeight = 960  //30 * 32
 
 	IDPlayer     = 1
-	IDSquare     = 2
-	IDWall       = 3
-	IDTester     = 4
-	IDFinish     = 5
-	IDCheckpoint = 6
+	IDBG         = 2
+	IDSquare     = 3
+	IDWall       = 4
+	IDTester     = 5
+	IDFinish     = 6
+	IDCheckpoint = 7
 )

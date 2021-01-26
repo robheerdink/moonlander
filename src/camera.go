@@ -100,12 +100,11 @@ func (c *Camera) Update() error {
 
 	// center camera view on player, unless panning
 	if !panCamera {
-		x, y, _, _ := player.GetImageInfo()
-		c.Position[0] = x - sha.ScreenWidth/2
-		c.Position[1] = y - sha.ScreenHeight/2
+		c.Position[0] = player.X - float64(sha.ScreenWidth/2)
+		c.Position[1] = player.Y - float64(sha.ScreenHeight/2)
 
-		//fmt.Println(x, y)
-		//fmt.Println(c, panCamera)
+		//fmt.Println(&player.X, &player.Y)
+		fmt.Println(c, panCamera)
 	}
 
 	// set level bounds

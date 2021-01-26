@@ -3,6 +3,7 @@ package com
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"math"
 
 	ass "moonlander/assets"
@@ -30,14 +31,18 @@ type Controls struct {
 }
 
 // NewPlayer constructor
-func NewPlayer(id int, img *ebiten.Image, x, y, z int, v Vector, hx, hy, hw, hh int, c color.RGBA) Player {
+func NewPlayer(id int, x, y, z int, v Vector, hx, hy, hw, hh int, c color.RGBA) Player {
+	img, _, err := ebitenutil.NewImageFromFile("assets/spaceship.png", ebiten.FilterDefault)
+	if err != nil {
+		log.Fatal(err)
+	}
 	wImg, hImg := img.Size()
 	p := Player{
 		Object:   NewObject(id, img, x, y, z, v, hx, hy, hw, hh, true, c),
 		Controls: Controls{false, false, false, false, false, false},
 		weight:   1,
 		thrust:   0.06,
-		retro:    0.02,
+		retro:    0.03,
 		zSpeed:   1.2,
 		imgW:     float64(wImg),
 		imgH:     float64(hImg),
@@ -69,12 +74,12 @@ func (o *Player) Draw(screen *ebiten.Image) error {
 	if o.Controls.down {
 		o.animD.Draw(screen)
 	}
-	if o.img != nil {
+	if o.Img != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(-o.imgHW, -o.imgHH)
-		op.GeoM.Rotate(o.z)
-		op.GeoM.Translate(o.x+o.imgHW, o.y+o.imgHH)
-		screen.DrawImage(o.img, op)
+		op.GeoM.Rotate(o.R)
+		op.GeoM.Translate(o.X+o.imgHW, o.Y+o.imgHH)
+		screen.DrawImage(o.Img, op)
 	}
 	if o.debug {
 		// draw hit shape (need to recreate image, because it changes shape)
@@ -89,7 +94,7 @@ func (o *Player) Draw(screen *ebiten.Image) error {
 
 	// draw Player related info
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f\nx : %0.2f\ny : %0.2f\nz : %0.2f\nv : %0.4f",
-		ebiten.CurrentTPS(), o.x, o.y, o.z, o.vector))
+		ebiten.CurrentTPS(), o.X, o.Y, o.R, o.Vector))
 
 	return nil
 }
@@ -123,21 +128,21 @@ func (o *Player) Update(screen *ebiten.Image) error {
 
 	// rotation
 	if o.Controls.rl {
-		o.z -= o.zSpeed * DegToRad
+		o.R -= o.zSpeed * DegToRad
 	}
 	if o.Controls.rr {
-		o.z += o.zSpeed * DegToRad
+		o.R += o.zSpeed * DegToRad
 	}
 	// convert radials always to be always positive between 0 - (2*Pi)
-	if o.z < 0 {
-		o.z += DPI
-	} else if o.z >= DPI {
-		o.z = 0
+	if o.R < 0 {
+		o.R += DPI
+	} else if o.R >= DPI {
+		o.R = 0
 	}
 
 	// direction (based on rotation)
-	zx := math.Sin(o.z)
-	zy := math.Cos(o.z)
+	zx := math.Sin(o.R)
+	zy := math.Cos(o.R)
 
 	//change hit shape, when rotating (morph between horizontal and vertical shape)
 	hMP := math.Pow(zx, 2) //[0 ..1] horizontal
@@ -149,100 +154,99 @@ func (o *Player) Update(screen *ebiten.Image) error {
 
 	// add velocity when pressing certan keys
 	if o.Controls.up {
-		o.vector.x -= o.thrust * zx * -1
-		o.vector.y -= o.thrust * zy
+		o.Vector.x -= o.thrust * zx * -1
+		o.Vector.y -= o.thrust * zy
 	}
 	if o.Controls.down {
-		o.vector.x += o.retro * zx
-		o.vector.y += o.retro * zy
-
+		o.Vector.x += o.retro * zx * -1
+		o.Vector.y += o.retro * zy
 	}
 	if o.Controls.right {
-		o.vector.x += o.retro * zy
-		o.vector.y += o.retro * zx
+		o.Vector.x += o.retro * zy
+		o.Vector.y += o.retro * zx
 	}
 	if o.Controls.left {
-		o.vector.x -= o.retro * zy
-		o.vector.y -= o.retro * zx
+		o.Vector.x -= o.retro * zy
+		o.Vector.y -= o.retro * zx
 	}
 
 	if o.grounded {
 		// when grounded, remove horizontal velocity and set ship facing up
-		o.vector.x *= 0.96
-		if o.z < PI {
-			o.z -= 0.1 * (o.z / PI)
+		o.Vector.x *= 0.96
+		if o.R < PI {
+			o.R -= 0.1 * (o.R / PI)
 		} else {
-			o.z += 0.1 * (DPI - o.z) / PI
+			o.R += 0.1 * (DPI - o.R) / PI
 		}
 		// snap last part, because we ease out in rotation
-		if o.z < 0.01 || o.z > PI*2-0.01 {
-			o.z = 0
-			o.vector.x = 0
+		if o.R < 0.01 || o.R > PI*2-0.01 {
+			o.R = 0
+			o.Vector.x = 0
 		}
 	} else {
 		// gravity always pushes ship nose-up or nose-down
 		// ship is in balance when flying perfectly horizontal
-		if o.z > 0.01 && o.z < PI {
-			if o.z < HPI {
+		if o.R > 0.01 && o.R < PI {
+			if o.R < HPI {
 				// go nose up
-				o.z -= (sha.LP.Gravity / 6) * ((HPI - o.z) / HPI)
+				o.R -= (sha.LP.Gravity / 6) * ((HPI - o.R) / HPI)
 			} else {
 				// go nose down
-				o.z += (sha.LP.Gravity / 4) * ((HPI - o.z) / HPI) * -1
+				o.R += (sha.LP.Gravity / 4) * ((HPI - o.R) / HPI) * -1
 			}
 		}
-		if o.z < DPI-0.01 && o.z > PI {
-			if o.z < (PI * 1.5) {
+		if o.R < DPI-0.01 && o.R > PI {
+			if o.R < (PI * 1.5) {
 				// go nose down
-				o.z -= (sha.LP.Gravity / 4) * ((PI/2*3 - o.z) / HPI)
+				o.R -= (sha.LP.Gravity / 4) * ((PI/2*3 - o.R) / HPI)
 			} else {
 				// go nose up
-				o.z += (sha.LP.Gravity / 6) * ((PI/2*3 - o.z) / HPI) * -1
+				o.R += (sha.LP.Gravity / 6) * ((PI/2*3 - o.R) / HPI) * -1
 			}
 		}
 
 		//add 'atmosphere' friction
-		o.vector.x *= sha.LP.Friction * o.weight
-		o.vector.y *= sha.LP.Friction * o.weight
+		o.Vector.x *= sha.LP.Friction * o.weight
+		o.Vector.y *= sha.LP.Friction * o.weight
 
 		// add gravity
-		o.vector.y += sha.LP.Gravity * o.weight
+		o.Vector.y += sha.LP.Gravity * o.weight
 	}
 
 	// update player position
-	o.x += o.vector.x
-	o.y += o.vector.y
+	o.X += o.Vector.x
+	o.Y += o.Vector.y
 
 	// update hit rect
-	o.rect.setXY(int(o.x)+o.rx, int(o.y)+o.ry)
+	o.rect.setXY(int(o.X)+o.rx, int(o.Y)+o.ry)
 
 	// also update anim location + rotation, based on player rotation + location
 	// do this after player postion is updated
-	cx, cy := o.x+o.imgHW, o.y+o.imgHH
+	cx, cy := o.X+o.imgHW, o.Y+o.imgHH
 	if o.Controls.up {
-		o.animU.x, o.animU.y = GetRotatedPoint(cx, cy, 0, +(o.imgHH + 16), o.z)
-		o.animU.z = o.z
+		o.animU.X, o.animU.Y = GetRotatedPoint(cx, cy, 0, +(o.imgHH + 16), o.R)
+		o.animU.R = o.R
 		o.animU.Update(screen)
 	}
 	if o.Controls.down {
-		o.animD.z = o.z
-		o.animD.x, o.animD.y = GetRotatedPoint(cx, cy, 0, -(o.imgHH + 16), o.z)
+		o.animD.R = o.R
+		o.animD.X, o.animD.Y = GetRotatedPoint(cx, cy, 0, -(o.imgHH + 16), o.R)
 		o.animD.Update(screen)
 	}
 	if o.Controls.right || o.Controls.rr {
-		o.animR.z = o.z
-		o.animR.x, o.animR.y = GetRotatedPoint(cx, cy, -(o.imgHW + 8), -10, o.z)
+		o.animR.R = o.R
+		o.animR.X, o.animR.Y = GetRotatedPoint(cx, cy, -(o.imgHW + 8), -10, o.R)
 		o.animR.Update(screen)
 	}
 	if o.Controls.left || o.Controls.rl {
-		o.animL.z = o.z
-		o.animL.x, o.animL.y = GetRotatedPoint(cx, cy, +(o.imgHW + 8), -10, o.z)
+		o.animL.R = o.R
+		o.animL.X, o.animL.Y = GetRotatedPoint(cx, cy, +(o.imgHW + 8), -10, o.R)
 		o.animL.Update(screen)
 	}
 	return nil
 }
 
-// Collide implements interface Collider, handles collission with ojects
+// Collide implements interface, handles collission with ojects
 func (o *Player) Collide(hitAbles []HitAble) error {
 	o.grounded = false
 
@@ -257,31 +261,31 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 				// player hits somehting solid
 				if t.solid {
 					if sides.left {
-						o.x = float64(t.rect.x-o.rect.w-o.rx) - 1
-						o.vector.x = 0
+						o.X = float64(t.rect.x-o.rect.w-o.rx) - 1
+						o.Vector.x = 0
 					}
 					if sides.right {
-						o.x = float64(t.rect.x+t.rect.w-o.rx) + 1
-						o.vector.x = 0
+						o.X = float64(t.rect.x+t.rect.w-o.rx) + 1
+						o.Vector.x = 0
 					}
 					if sides.top {
 						// if we hit a wall, set player to grounded and set on top block, without offset
-						if t.id == sha.IDWall && !o.grounded {
-							o.y = float64(t.rect.y - o.rect.h - o.ry)
+						if t.ID == sha.IDWall && !o.grounded {
+							o.Y = float64(t.rect.y - o.rect.h - o.ry)
 							o.grounded = true
 						} else {
-							o.y = float64(t.rect.y-o.rect.h-o.ry) - 0
-							o.vector.y = 0
+							o.Y = float64(t.rect.y-o.rect.h-o.ry) - 0
+							o.Vector.y = 0
 						}
 					}
 					if sides.bottom {
-						o.y = float64(t.rect.y+t.rect.h-o.ry) + 1
-						o.vector.y = 0
+						o.Y = float64(t.rect.y+t.rect.h-o.ry) + 1
+						o.Vector.y = 0
 					}
 				} else {
-					if t.id == sha.IDCheckpoint {
+					if t.ID == sha.IDCheckpoint {
 						h.SetHit(o)
-					} else if t.id == sha.IDFinish {
+					} else if t.ID == sha.IDFinish {
 						h.SetHit(o)
 					}
 				}
@@ -293,11 +297,11 @@ func (o *Player) Collide(hitAbles []HitAble) error {
 }
 
 func (o *Player) reset() {
-	o.x = float64(sha.LP.PlayerStartX)
-	o.y = float64(sha.LP.PlayerStartY)
-	o.z = 0
-	o.vector.x = 0
-	o.vector.y = 0
+	o.X = float64(sha.LP.PlayerStartX)
+	o.Y = float64(sha.LP.PlayerStartY)
+	o.R = 0
+	o.Vector.x = 0
+	o.Vector.y = 0
 }
 
 func (o *Player) addHit(obj *Object) {

@@ -10,7 +10,6 @@ import (
 
 // Object is a Sprite with collision
 type Object struct {
-	id int
 	Sprite
 	HitShape
 	debug bool
@@ -29,8 +28,7 @@ func NewObject(id int, img *ebiten.Image, x, y, z int, v Vector, rx, ry, rw, rh 
 		img.Fill(c)
 	}
 	return Object{
-		id:     id,
-		Sprite: NewSprite(img, x, y, z, v),
+		Sprite: NewSprite(id, img, x, y, z, v),
 		HitShape: HitShape{
 			rx:        rx,
 			ry:        ry,
@@ -43,12 +41,33 @@ func NewObject(id int, img *ebiten.Image, x, y, z int, v Vector, rx, ry, rw, rh 
 	}
 }
 
-// Draw implements Drawer
+// GetID implements interface, returns an id
+func (o *Object) GetID() int {
+	return o.ID
+}
+
+// GetInfo implements interface, returns info for debugging
+func (o *Object) GetInfo() (id int, name string, x, y, r float64, w, h int) {
+	w, h = o.Img.Size()
+	return o.ID, sha.Name[o.ID], o.X, o.Y, o.R, w, h
+}
+
+// GetObject implements interface
+func (o *Object) GetObject() *Object {
+	return o
+}
+
+// SetHit implements interface
+func (o *Object) SetHit(collider Collider) {
+	//fmt.Println("set hit called")
+}
+
+// Draw i implements interface
 func (o *Object) Draw(screen *ebiten.Image) error {
-	if o.img != nil {
+	if o.Img != nil {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(o.x, o.y)
-		screen.DrawImage(o.img, op)
+		op.GeoM.Translate(o.X, o.Y)
+		screen.DrawImage(o.Img, op)
 	}
 	if o.rectImg != nil {
 		// only draw hit rect, when it gets a hit tag
@@ -63,20 +82,10 @@ func (o *Object) Draw(screen *ebiten.Image) error {
 
 // Update implements Updater
 func (o *Object) Update(screen *ebiten.Image) error {
-	o.x += o.vector.x
-	o.y += o.vector.y
-	o.rect.setXY(int(o.x)+o.rx, int(o.y)+o.ry)
+	o.X += o.Vector.x
+	o.Y += o.Vector.y
+	o.rect.setXY(int(o.X)+o.rx, int(o.Y)+o.ry)
 	return nil
-}
-
-// SetHit implements HitAble
-func (o *Object) SetHit(collider Collider) {
-	//fmt.Println("set hit called")
-}
-
-// GetObject implements HitAble
-func (o *Object) GetObject() *Object {
-	return o
 }
 
 // GetRect returns the object hitshape rect

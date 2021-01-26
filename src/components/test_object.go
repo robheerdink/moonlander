@@ -36,12 +36,12 @@ func NewCollideTest(id, x, y, z int, v Vector, rx, ry, rw, rh int, c color.RGBA)
 //Draw overrides Drawable interface (from default Sprite)
 func (o *TestObject) Draw(screen *ebiten.Image) error {
 	// draw vissual image
-	if o.img != nil {
+	if o.Img != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(-o.imgHW, -o.imgHH)
-		op.GeoM.Rotate(o.z)
-		op.GeoM.Translate(o.x+o.imgHW, o.y+o.imgHH)
-		screen.DrawImage(o.img, op)
+		op.GeoM.Rotate(o.R)
+		op.GeoM.Translate(o.X+o.imgHW, o.Y+o.imgHH)
+		screen.DrawImage(o.Img, op)
 	}
 	// draw hit rect
 	if o.rectImg != nil {
@@ -60,33 +60,33 @@ func (o *TestObject) Update(screen *ebiten.Image) error {
 	o.removeHit()
 
 	// slow down
-	o.vector.x *= 0.9
-	o.vector.y *= 0.9
+	o.Vector.x *= 0.9
+	o.Vector.y *= 0.9
 
 	if ebiten.IsKeyPressed(ebiten.KeyT) {
-		o.vector.y = o.speed * -1
+		o.Vector.y = o.speed * -1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyG) {
-		o.vector.y = o.speed
+		o.Vector.y = o.speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyF) {
-		o.vector.x = o.speed * -1
+		o.Vector.x = o.speed * -1
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyH) {
-		o.vector.x = o.speed
+		o.Vector.x = o.speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyR) {
-		o.z -= (o.speed * 2) * DegToRad
+		o.R -= (o.speed * 2) * DegToRad
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyY) {
-		o.z += (o.speed * 2) * DegToRad
+		o.R += (o.speed * 2) * DegToRad
 	}
-	if math.Abs(o.z) > DPI {
-		o.z = 0
+	if math.Abs(o.R) > DPI {
+		o.R = 0
 	}
 
-	zx := math.Sin(o.z)
-	zy := math.Cos(o.z)
+	zx := math.Sin(o.R)
+	zy := math.Cos(o.R)
 
 	nzx := math.Pow(zx, 2)
 	nzy := math.Pow(zy, 2)
@@ -96,11 +96,11 @@ func (o *TestObject) Update(screen *ebiten.Image) error {
 	o.ry = o.hitY + int(float64(o.hitDiff)*nzx)*-1
 
 	// update position
-	o.x += o.vector.x
-	o.y += o.vector.y
+	o.X += o.Vector.x
+	o.Y += o.Vector.y
 
 	// update hit rect
-	o.rect.setXY(int(o.x)+o.rx, int(o.y)+o.ry)
+	o.rect.setXY(int(o.X)+o.rx, int(o.Y)+o.ry)
 	return nil
 }
 
@@ -121,20 +121,20 @@ func (o *TestObject) Collide(hitAbles []HitAble) error {
 				if t.solid {
 					o.addHit(t)
 					if sides.left {
-						o.x = float64(t.rect.x-o.rect.w-o.rx) - 1
-						o.vector.x = 0
+						o.X = float64(t.rect.x-o.rect.w-o.rx) - 1
+						o.Vector.x = 0
 					}
 					if sides.right {
-						o.x = float64(t.rect.x+t.rect.w-o.rx) + 1
-						o.vector.x = 0
+						o.X = float64(t.rect.x+t.rect.w-o.rx) + 1
+						o.Vector.x = 0
 					}
 					if sides.top {
-						o.y = float64(t.rect.y-o.rect.h-o.ry) - 1
-						o.vector.y = 0
+						o.Y = float64(t.rect.y-o.rect.h-o.ry) - 1
+						o.Vector.y = 0
 					}
 					if sides.bottom {
-						o.y = float64(t.rect.y+t.rect.h-o.ry) + 1
-						o.vector.y = 0
+						o.Y = float64(t.rect.y+t.rect.h-o.ry) + 1
+						o.Vector.y = 0
 					}
 				}
 			}
