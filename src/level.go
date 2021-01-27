@@ -2,10 +2,10 @@ package src
 
 import (
 	//"image/color"
-	"bytes"
+
+	"encoding/xml"
 	"fmt"
-	"image"
-	"log"
+	"io/ioutil"
 	"math/rand"
 	"os"
 	"strconv"
@@ -14,9 +14,29 @@ import (
 	com "moonlander/src/components"
 	sha "moonlander/src/shared"
 
-	"github.com/hajimehoshi/ebiten"
 	"github.com/lafriks/go-tiled"
 )
+
+// ObjectTypes ..
+type ObjectTypes struct {
+	XMLName    xml.Name     `xml:"objecttypes"`
+	ObjectType []ObjectType `xml:"objecttype"`
+}
+
+// ObjectType ..
+type ObjectType struct {
+	XMLName    xml.Name   `xml:"objecttype"`
+	Name       string     `xml:"name,attr"`
+	Color      string     `xml:"color,attr"`
+	Properties []Property `xml:"property"`
+}
+
+// Property ..
+type Property struct {
+	Name    string `xml:"name,attr"`
+	Type    string `xml:"type,attr"`
+	Default string `xml:"default,attr"`
+}
 
 // Variables related to level
 var (
@@ -30,6 +50,7 @@ var (
 	finish         com.Finish
 )
 
+// ClearLevel global variables
 func ClearLevel() {
 	DrawWorldList = nil
 	DrawScreenList = nil
@@ -38,8 +59,30 @@ func ClearLevel() {
 	CollideList = nil
 }
 
-func LoadTMX(mapPath string) {
-	/* LoadTMX loads a level with format TMX (tiled) */
+// LoadLevel loads a specific level
+func LoadLevel(name string) {
+	// xml created by Tiled with default values of object types
+	objectTypePath := "assets/tiled/objecttypes.xml"
+
+	if name == "lvl01" {
+		loadTMX("assets/tiled/level01.tmx", objectTypePath)
+		finalizeLevel()
+	} else if name == "lvl02" {
+		loadTMX("assets/tiled/level02.tmx", objectTypePath)
+		finalizeLevel()
+		spwanRandomSquares(HitAbleList, 8, 50)
+	} else if name == "lvl03" {
+		loadTMX("assets/tiled/level03.tmx", objectTypePath)
+		finalizeLevel()
+	}
+
+	// anim example
+	anim := com.NewAnimFromByte(ass.Runner_png, 200, 200, 0, com.Vector{}, com.NewFrame(0, 32, 32, 32, 8, 5))
+	DrawWorldList = append(DrawWorldList, &anim)
+	UpdateList = append(UpdateList, &anim)
+}
+
+func loadTMX(mapPath string, objectpath string) {
 	// parse tmx format
 	m, err := tiled.LoadFromFile(mapPath)
 	if err != nil {
@@ -54,47 +97,83 @@ func LoadTMX(mapPath string) {
 		MaxLaps:  getLevelMaxMaps(m),
 		Width:    m.Width * m.TileWidth,
 		Height:   m.Height * m.TileHeight,
+		BG:       getLevelBackground(m),
 	}
-	bgPath := getLevelBackground(m)
-	bg := com.NewBackground(sha.IDBG, bgPath, 0, 0, 0, sha.LP.Width, sha.LP.Height, com.Vector{})
+	bg := com.NewBackground(sha.IDBG, sha.LP.BG, 0, 0, 0, sha.LP.Width, sha.LP.Height, com.Vector{})
 	DrawWorldList = append(DrawWorldList, &bg)
-	fmt.Println("level properties:")
-	fmt.Println("sha.LP.Width    :", sha.LP.Width)
-	fmt.Println("sha.LP.Height   :", sha.LP.Height)
-	fmt.Println("sha.LP.Gravity  :", sha.LP.Gravity)
-	fmt.Println("sha.LP.Friction :", sha.LP.Friction)
-	fmt.Println("sha.LP.MaxLaps  :", sha.LP.MaxLaps)
-	fmt.Println("background path :", bgPath)
-	fmt.Println("----------------------------------")
+	printLevelProperties()
 
-	//loop through tile layers
+	// Get object types properties default values
+	objectTypes := getObjectTypes(objectpath)
+
+	//loop through tile layers (not used atm)
 	for _, layer := range m.Layers {
 		for i, tile := range layer.Tiles {
 			x, y := layer.GetTilePosition(i)
 			if tile.Tileset != nil {
-				levelItem(strconv.FormatUint(uint64(tile.ID), 10), "", x, y, m.TileWidth, m.TileHeight, 0, tile.Tileset.Tiles[tile.ID].Properties)
+				id := strconv.FormatUint(uint64(tile.ID), 10)
+				addLevelItem(id, "", x, y, m.TileWidth, m.TileHeight, 0,
+					tile.Tileset.Tiles[tile.ID].Properties, objectTypes)
 			}
 		}
 	}
 	// loop through object layers
 	for _, objLayer := range m.ObjectGroups {
 		for _, obj := range objLayer.Objects {
-			levelItem(obj.Type, obj.Name, int(obj.X), int(obj.Y), int(obj.Width), int(obj.Height), int(obj.Rotation), obj.Properties)
+			addLevelItem(obj.Type, obj.Name, int(obj.X), int(obj.Y), int(obj.Width),
+				int(obj.Height), int(obj.Rotation), obj.Properties, objectTypes)
 		}
 	}
 }
 
-func levelItem(id, name string, x, y, w, h, rotation int, prop tiled.Properties) {
-	fmt.Printf("id:%v, name:%v, x:%v ,y:%v, w:%v, h:%v, r:%v, prop:%v", id, name, x, y, w, h, rotation, prop)
+// Object properties are not in TMX level data
+// unless an object instance overrides its default value or adds an instance properyu
+func getObjectTypes(xmlPath string) []ObjectType {
+	xmlFile, err := os.Open(xmlPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer xmlFile.Close()
+
+	// read xmlFile as a byte array and unmarshall to struct
+	data, _ := ioutil.ReadAll(xmlFile)
+	var objectTypes ObjectTypes
+	xml.Unmarshal(data, &objectTypes)
+	return objectTypes.ObjectType
+}
+
+func getObjectProps(id string, objectTypes []ObjectType) []Property {
+	// match id, with objectType name
+	// if it matches return Properties
+	for _, o := range objectTypes {
+		if o.Name == id {
+			return o.Properties
+		}
+	}
+	// TODO also add overridden values from TMX and add unique instance properties
+	return nil
+}
+
+func addLevelItem(id, name string, x, y, w, h, rotation int, prop tiled.Properties, objectTypes []ObjectType) {
+	//fmt.Printf("id:%v, name:%v, x:%v ,y:%v, w:%v, h:%v, r:%v, prop:%v", id, name, x, y, w, h, rotation, prop)
+
+	p := getObjectProps(id, objectTypes)
+	fmt.Println(p)
+
+	// TODO want to use the objectTypes to determine in which intrfaces list's it should be appended
+	// issue is that we can cast specific instances like a Player to something generic
+	// and then add it to interface list, which it fullfills the contract
+	// solutions
+	// - interface stubs?
+	// - type assertion?
 
 	if id == "wall" {
-		fmt.Printf(" >> add wall\n")
 		o := com.NewWall(sha.IDWall, x, y, w, h, sha.Blue50)
 		DrawWorldList = append(DrawWorldList, &o)
 		HitAbleList = append(HitAbleList, &o)
 	}
+
 	if id == "player" {
-		fmt.Printf(" >> add player\n")
 		player = com.NewPlayer(sha.IDPlayer, x, y, 0, com.Vector{}, 8, 8, 30, 48, sha.Red50)
 		DrawWorldList = append(DrawWorldList, &player)
 		HitAbleList = append(HitAbleList, &player)
@@ -121,6 +200,7 @@ func levelItem(id, name string, x, y, w, h, rotation int, prop tiled.Properties)
 		DrawWorldList = append(DrawWorldList, &finish)
 		HitAbleList = append(HitAbleList, &finish)
 	}
+
 }
 
 func finalizeLevel() {
@@ -128,37 +208,12 @@ func finalizeLevel() {
 	SetWorldImage(sha.LP.Width, sha.LP.Height)
 
 	// create gui
-	tb := com.NewTextBlock(sha.LP.Width-150, 50)
+	tb := com.NewTextBlock(sha.ScreenWidth-80, 50)
 	DrawScreenList = append(DrawScreenList, &tb)
 
 	// add all checkpoints to finish
 	finish.Checkpoints = checkpoints
-	printAllLevelObjects()
-}
-
-// LoadLevel loads a specific level
-func LoadLevel(name string) {
-	if name == "lvl01" {
-		LoadTMX("assets/tiled/level01.tmx")
-		finalizeLevel()
-	} else if name == "lvl02" {
-		LoadTMX("assets/tiled/level02.tmx")
-		finalizeLevel()
-		spwanRandomSquares(HitAbleList, 8, 50)
-	} else if name == "lvl03" {
-		LoadTMX("assets/tiled/level03.tmx")
-		finalizeLevel()
-	}
-
-	// anim example
-	img, _, err := image.Decode(bytes.NewReader(ass.Runner_png))
-	if err != nil {
-		log.Fatal(err)
-	}
-	runnerImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterDefault)
-	anim := com.NewAnim(runnerImage, 200, 200, 0, com.Vector{}, com.NewFrame(0, 32, 32, 32, 8, 5))
-	DrawWorldList = append(DrawWorldList, &anim)
-	UpdateList = append(UpdateList, &anim)
+	printLevelObjects()
 }
 
 // spwans squares in playable level dimensions, and makes sure that the squares dont overlap other objects
@@ -231,7 +286,11 @@ func getRandonPosition(offsetX, offsetY, space int, dontOverlap []com.HitAble) (
 	return x, y
 }
 
-func printAllLevelObjects() {
+func printLevelProperties() {
+	fmt.Printf("level properties:\n%+v\n", sha.LP)
+}
+
+func printLevelObjects() {
 	fmt.Println("\nDrawWorldList")
 	for _, o := range DrawWorldList {
 		fmt.Println(o.GetInfo())

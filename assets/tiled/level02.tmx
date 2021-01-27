@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="24">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="160" height="160" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="34">
  <editorsettings>
-  <export format="tmx"/>
+  <export target="." format="tmx"/>
  </editorsettings>
  <properties>
   <property name="background" value="assets/space.png"/>
@@ -10,23 +10,36 @@
   <property name="maxLaps" value="3"/>
  </properties>
  <tileset firstgid="1" source="tilesets/squares.tsx"/>
- <layer id="1" name="layer1" width="80" height="30">
+ <layer id="1" name="layer1" width="160" height="160">
   <data encoding="base64" compression="zlib">
-   eJztwTEBAAAAwqD1T20Hb6AAAAAAAAAAAAB4DCWAAAE=
+   eJztwQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHwYkA8AAQ==
   </data>
  </layer>
  <objectgroup id="5" name="layer2">
-  <object id="2" name="wall" type="wall" x="0" y="0" width="2560" height="32"/>
-  <object id="7" name="wall" type="wall" x="0" y="928" width="2560" height="32"/>
+  <object id="2" name="wall" type="wall" x="0" y="0" width="2560" height="16"/>
+  <object id="7" name="wall" type="wall" x="0" y="2544" width="2560" height="16"/>
   <object id="9" name="player1" type="player" x="96" y="416" width="32" height="32"/>
-  <object id="11" name="wall" type="wall" x="224" y="480" width="2144" height="32"/>
-  <object id="16" name="wall" type="wall" x="0" y="32" width="32" height="896"/>
-  <object id="17" name="wall" type="wall" x="2528" y="32" width="32" height="896"/>
-  <object id="18" name="wall" type="wall" x="1440" y="224" width="32" height="256"/>
-  <object id="19" name="wall" type="wall" x="1440" y="512" width="32" height="224"/>
-  <object id="20" name="finish" type="finish" x="1440" y="736" width="32" height="192"/>
-  <object id="21" name="cp1" type="cp" x="2368" y="480" width="160" height="32"/>
-  <object id="22" name="cp2" type="cp" x="1440" y="32" width="32" height="192"/>
-  <object id="23" name="cp3" type="cp" x="32" y="480" width="192" height="32"/>
+  <object id="11" name="wall" type="wall" x="464" y="1264" width="1632" height="48"/>
+  <object id="16" name="wall" type="wall" x="0" y="32" width="16" height="2512"/>
+  <object id="17" name="wall" type="wall" x="2544" y="16" width="16" height="2512"/>
+  <object id="18" name="wall" type="wall" x="1296" y="464" width="48" height="800"/>
+  <object id="19" name="wall" type="wall" x="1296" y="1312" width="48" height="784"/>
+  <object id="20" name="finish" type="finish" x="1312" y="2096" width="16" height="448"/>
+  <object id="21" name="cp1" type="cp" x="2096" y="1280" width="448" height="16"/>
+  <object id="22" name="cp2" type="cp" x="1312" y="16" width="16" height="448"/>
+  <object id="23" name="cp3" type="cp" x="16" y="1280" width="448" height="16"/>
+  <object id="25" name="wall" type="wall" x="1536" y="240" width="16" height="496" rotation="314.157"/>
+  <object id="27" name="wall" type="wall" x="256" y="624" width="496" height="16">
+   <properties>
+    <property name="draw" value="1"/>
+    <property name="hit" value="1"/>
+   </properties>
+  </object>
+  <object id="28" name="wall" type="wall" x="256" y="1696" width="256" height="256"/>
+  <object id="29" name="wall" type="wall" x="736" y="2096" width="256" height="256"/>
+  <object id="30" name="wall" type="wall" x="1840" y="2128" width="112" height="112"/>
+  <object id="31" name="wall" type="wall" x="2144" y="1952" width="112" height="112"/>
+  <object id="32" name="wall" type="wall" x="1856" y="1760" width="112" height="112"/>
+  <object id="33" name="wall" type="wall" x="2048" y="592" width="16" height="496"/>
  </objectgroup>
 </map>

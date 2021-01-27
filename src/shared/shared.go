@@ -11,6 +11,7 @@ var (
 type LevelProperties struct {
 	Width        int
 	Height       int
+	BG			 string
 	Gravity      float64
 	Friction     float64
 	PlayerStartX int

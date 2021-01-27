@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objecttypes>
+ <objecttype name="cp" color="#ffff00">
+  <property name="draw" type="string" default="1"/>
+  <property name="hit" type="string" default="1"/>
+ </objecttype>
+ <objecttype name="finish" color="#ffffff">
+  <property name="draw" type="string" default="1"/>
+  <property name="hit" type="string" default="1"/>
+ </objecttype>
+ <objecttype name="player" color="#00ff00">
+  <property name="collide" type="string" default="1"/>
+  <property name="draw" type="string" default="1"/>
+  <property name="hit" type="string" default="1"/>
+  <property name="update" type="string" default="1"/>
+ </objecttype>
+ <objecttype name="tester" color="#ff0000">
+  <property name="collide" type="string" default="1"/>
+  <property name="draw" type="string" default="1"/>
+  <property name="hit" type="string" default="1"/>
+  <property name="update" type="string" default="1"/>
+ </objecttype>
+ <objecttype name="wall" color="#0000ff">
+  <property name="color" type="string" default="blue"/>
+  <property name="draw" type="string" default="1"/>
+  <property name="hit" type="string" default="1"/>
+ </objecttype>
+</objecttypes>

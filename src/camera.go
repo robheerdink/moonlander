@@ -102,9 +102,8 @@ func (c *Camera) Update() error {
 	if !panCamera {
 		c.Position[0] = player.X - float64(sha.ScreenWidth/2)
 		c.Position[1] = player.Y - float64(sha.ScreenHeight/2)
-
 		//fmt.Println(&player.X, &player.Y)
-		fmt.Println(c, panCamera)
+		//fmt.Println(c, panCamera)
 	}
 
 	// set level bounds

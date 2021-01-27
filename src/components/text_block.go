@@ -20,6 +20,7 @@ var (
 	laps     Text
 	laptime  Text
 	gravity  Text
+	friction Text
 	endTimes string
 )
 
@@ -40,7 +41,7 @@ func init() {
 		log.Fatal(err)
 	}
 	face = truetype.NewFace(tt, &truetype.Options{
-		Size:    24,
+		Size:    18,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
@@ -51,8 +52,9 @@ func NewTextBlock(x, y int) TextBlock {
 	// setup textboxes
 
 	gravity = NewText(0, 0, "", face, sha.Blue)
-	laps = NewText(0, 30, "", face, sha.Blue)
-	laptime = NewText(0, 60, "", face, sha.Red)
+	friction = NewText(0, 22, "", face, sha.Blue)
+	laps = NewText(0, 44, "", face, sha.Blue)
+	laptime = NewText(0, 66, "", face, sha.Red)
 	return TextBlock{x, y}
 }
 
@@ -76,10 +78,12 @@ func (o *TextBlock) Draw(screen *ebiten.Image) error {
 	}
 
 	// update Gravity value
-	gravity.text = fmt.Sprintf("%.2fG", (sha.LP.Gravity * 60))
+	gravity.text = fmt.Sprintf("%.3fG", (sha.LP.Gravity * 50))
+	friction.text = fmt.Sprintf("%.3fF", sha.LP.Friction)
 
 	// draw
 	text.Draw(screen, gravity.text, face, o.x+gravity.x, o.y+gravity.y, laps.color)
+	text.Draw(screen, friction.text, face, o.x+friction.x, o.y+friction.y, laps.color)
 	text.Draw(screen, laps.text, face, o.x+laps.x, o.y+laps.y, laps.color)
 	text.Draw(screen, laptime.text, face, o.x+laptime.x, o.y+laptime.y, laptime.color)
 	return nil
