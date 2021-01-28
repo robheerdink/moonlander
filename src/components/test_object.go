@@ -104,13 +104,8 @@ func (o *TestObject) Update(screen *ebiten.Image) error {
 	return nil
 }
 
-// GetObject implements interface Collider, so we can get the object from a Collider
-func (o *TestObject) GetObject() *Object {
-	return &o.Object
-}
-
 //Collide implements interface Collider, handles collission with ojects
-func (o *TestObject) Collide(hitAbles []HitAble) error {
+func (o *TestObject) Collide(hitAbles []GameObject) error {
 
 	for _, h := range hitAbles {
 		t := h.GetObject()

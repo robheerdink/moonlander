@@ -41,25 +41,15 @@ func NewObject(id int, img *ebiten.Image, x, y, z int, v Vector, rx, ry, rw, rh 
 	}
 }
 
-// GetID implements interface, returns an id
+// GetID implements interface
 func (o *Object) GetID() int {
 	return o.ID
 }
 
-// GetInfo implements interface, returns info for debugging
+// GetInfo implements interface
 func (o *Object) GetInfo() (id int, name string, x, y, r float64, w, h int) {
 	w, h = o.Img.Size()
 	return o.ID, sha.Name[o.ID], o.X, o.Y, o.R, w, h
-}
-
-// GetObject implements interface
-func (o *Object) GetObject() *Object {
-	return o
-}
-
-// SetHit implements interface
-func (o *Object) SetHit(collider Collider) {
-	//fmt.Println("set hit called")
 }
 
 // Draw i implements interface
@@ -80,11 +70,25 @@ func (o *Object) Draw(screen *ebiten.Image) error {
 	return nil
 }
 
-// Update implements Updater
+// Update implements interface
 func (o *Object) Update(screen *ebiten.Image) error {
 	o.X += o.Vector.x
 	o.Y += o.Vector.y
 	o.rect.setXY(int(o.X)+o.rx, int(o.Y)+o.ry)
+	return nil
+}
+
+// GetObject implements interface
+func (o *Object) GetObject() *Object {
+	return o
+}
+
+// SetHit implements interface
+func (o *Object) SetHit(collider GameObject) {
+}
+
+// Collide implements interface
+func (o *Object) Collide(hitAbles []GameObject) error {
 	return nil
 }
 

@@ -21,6 +21,7 @@ var (
 	laptime  Text
 	gravity  Text
 	friction Text
+	fps      Text
 	endTimes string
 )
 
@@ -41,7 +42,7 @@ func init() {
 		log.Fatal(err)
 	}
 	face = truetype.NewFace(tt, &truetype.Options{
-		Size:    18,
+		Size:    16,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
@@ -50,15 +51,25 @@ func init() {
 // NewTextBlock contructor
 func NewTextBlock(x, y int) TextBlock {
 	// setup textboxes
-
-	gravity = NewText(0, 0, "", face, sha.Blue)
-	friction = NewText(0, 22, "", face, sha.Blue)
-	laps = NewText(0, 44, "", face, sha.Blue)
-	laptime = NewText(0, 66, "", face, sha.Red)
+	fps = NewText(0, 0, "", face, sha.White)
+	gravity = NewText(0, 20, "", face, sha.White)
+	friction = NewText(0, 40, "", face, sha.White)
+	laps = NewText(0, 60, "", face, sha.White)
+	laptime = NewText(0, 80, "", face, sha.White)
 	return TextBlock{x, y}
 }
 
-// Draw it
+// GetID implements interface
+func (o *TextBlock) GetID() int {
+	return 0
+}
+
+// GetInfo implements interface
+func (o *TextBlock) GetInfo() (id int, name string, x, y, r float64, w, h int) {
+	return 0, sha.Name[0], float64(o.x), float64(o.y), 0, 0, 0
+}
+
+// Draw implements interface
 func (o *TextBlock) Draw(screen *ebiten.Image) error {
 
 	// update laps
@@ -77,11 +88,13 @@ func (o *TextBlock) Draw(screen *ebiten.Image) error {
 		}
 	}
 
-	// update Gravity value
+	// update other textfields
+	fps.text = fmt.Sprintf("%.2f", ebiten.CurrentTPS())
 	gravity.text = fmt.Sprintf("%.3fG", (sha.LP.Gravity * 50))
 	friction.text = fmt.Sprintf("%.3fF", sha.LP.Friction)
 
 	// draw
+	text.Draw(screen, fps.text, face, o.x+fps.x, o.y+fps.y, laps.color)
 	text.Draw(screen, gravity.text, face, o.x+gravity.x, o.y+gravity.y, laps.color)
 	text.Draw(screen, friction.text, face, o.x+friction.x, o.y+friction.y, laps.color)
 	text.Draw(screen, laps.text, face, o.x+laps.x, o.y+laps.y, laps.color)
@@ -89,14 +102,24 @@ func (o *TextBlock) Draw(screen *ebiten.Image) error {
 	return nil
 }
 
-// GetID implements interface, returns the id
-func (o *TextBlock) GetID() int {
-	return 0
+// Update implements interface
+func (o *TextBlock) Update(screen *ebiten.Image) error {
+	// gui is updated in draw
+	return nil
 }
 
-// GetInfo implements interface, returns info for debugging
-func (o *TextBlock) GetInfo() (id int, name string, x, y, r float64, w, h int) {
-	return 0, sha.Name[0], float64(o.x), float64(o.y), 0, 0, 0
+// GetObject implements interface
+func (o *TextBlock) GetObject() *Object {
+	return nil
+}
+
+// SetHit implements interface
+func (o *TextBlock) SetHit(collider GameObject) {
+}
+
+// Collide implements interface
+func (o *TextBlock) Collide(hitAbles []GameObject) error {
+	return nil
 }
 
 // Get elapsed time from a start time
@@ -128,7 +151,3 @@ func calcEndTimes() string {
 	str += fmt.Sprintf("-----------\n%02d:%02d.%03d\n", total.min, total.sec, total.ms)
 	return str
 }
-
-// atm we update values in draw
-// func (o *TextBlock) Update(screen *ebiten.Image) error {
-// }

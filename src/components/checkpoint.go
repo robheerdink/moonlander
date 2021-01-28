@@ -19,7 +19,7 @@ func NewCheckpoint(id, x, y, w, h int, c color.RGBA, done bool) Checkpoint {
 }
 
 // SetHit Override
-func (o *Checkpoint) SetHit(collider Collider) {
+func (o *Checkpoint) SetHit(collider GameObject) {
 	o.Hit = true
 	o.done = true
 }

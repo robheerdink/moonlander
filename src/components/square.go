@@ -14,13 +14,8 @@ func NewSquare(id, x, y, z int, v Vector, rx, ry, rw, rh int, c color.RGBA) Squa
 	return Square{Object: NewObject(id, nil, x, y, z, v, rx, ry, rw, rh, true, c)}
 }
 
-// GetObject implements interface Collider
-// func (o *Square) GetObject() *Object {
-// 	return &o.Object
-// }
-
 // Collide implements interface Collider
-func (o *Square) Collide(hitAbles []HitAble) error {
+func (o *Square) Collide(hitAbles []GameObject) error {
 
 	for _, h := range hitAbles {
 		t := h.GetObject()

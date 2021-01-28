@@ -22,7 +22,7 @@ func NewFinish(id, x, y, w, h int, c color.RGBA, checkpoints []*Checkpoint) Fini
 }
 
 // SetHit Override
-func (o *Finish) SetHit(collider Collider) {
+func (o *Finish) SetHit(collider GameObject) {
 
 	if !o.finished {
 

@@ -16,18 +16,14 @@ https://github.com/lafriks/go-tiled
 https://pkg.go.dev/github.com/lafriks/go-tiled
 
 
-
-- if we have scrolling levels, we need better way to create levels
-    - tiled?
-    - array?
-    - think about spawning dynamic, stuff which is not in level
-    - think about stuff which uses a lot of tiles, like a thin finish line
-    - use sub image drawing, we would need to add hit objects 'under' the drawing
-    - do we want to remove or destroy the level layer?
-
+- improve tiled unique properties and overriden values
+- add support for rotated drawing of all objects 
+- add support for rotated hit detection 
 - make background which is loopable
+- backgrounds should represent low atmosohere not space (because we use friction)
 - make fuel mechanic's
 - add limited nr of lives
+- destroy ship when hitting certain walls
 - add damage
 
 #############################################

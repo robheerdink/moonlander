@@ -16,34 +16,15 @@ const (
 	DegToRad float64 = math.Pi / 180
 )
 
-// Drawer can be drawn every frame
-type Drawer interface {
+// GameObject interface for all game objects
+type GameObject interface {
 	GetID() (id int)
 	GetInfo() (id int, name string, x, y, r float64, w, h int)
 	Draw(screen *ebiten.Image) error
-}
-
-// Updater can be updated every frame
-type Updater interface {
-	GetID() (id int)
-	GetInfo() (id int, name string, x, y, r float64, w, h int)
 	Update(screen *ebiten.Image) error
-}
-
-// HitAble something that can be hit / collided with
-type HitAble interface {
-	GetID() (id int)
-	GetInfo() (id int, name string, x, y, r float64, w, h int)
+	SetHit(collider GameObject)
 	GetObject() *Object
-	SetHit(collider Collider)
-}
-
-// Collider checks collisions with HitAble's
-type Collider interface {
-	GetID() (id int)
-	GetInfo() (id int, name string, x, y, r float64, w, h int)
-	GetObject() *Object
-	Collide(hitList []HitAble) error
+	Collide(hitList []GameObject) error
 }
 
 // Vector used for direction of objects

@@ -1,8 +1,6 @@
 package src
 
 import (
-	//"image/color"
-
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	ass "moonlander/assets"
 	com "moonlander/src/components"
 	sha "moonlander/src/shared"
 
@@ -41,11 +38,11 @@ type Property struct {
 // Variables related to level
 var (
 	player         com.Player
-	DrawWorldList  []com.Drawer
-	DrawScreenList []com.Drawer
-	HitAbleList    []com.HitAble
-	UpdateList     []com.Updater
-	CollideList    []com.Collider
+	DrawWorldList  []com.GameObject
+	DrawScreenList []com.GameObject
+	HitAbleList    []com.GameObject
+	UpdateList     []com.GameObject
+	CollideList    []com.GameObject
 	checkpoints    []*com.Checkpoint
 	finish         com.Finish
 )
@@ -57,40 +54,36 @@ func ClearLevel() {
 	HitAbleList = nil
 	UpdateList = nil
 	CollideList = nil
+	checkpoints = nil
 }
 
 // LoadLevel loads a specific level
 func LoadLevel(name string) {
 	// xml created by Tiled with default values of object types
+	// as long as the default values are not overriden, they will not be in TMX file
 	objectTypePath := "assets/tiled/objecttypes.xml"
-
 	if name == "lvl01" {
-		loadTMX("assets/tiled/level01.tmx", objectTypePath)
+		loadTiledData("assets/tiled/level01.tmx", objectTypePath)
 		finalizeLevel()
 	} else if name == "lvl02" {
-		loadTMX("assets/tiled/level02.tmx", objectTypePath)
+		loadTiledData("assets/tiled/level02.tmx", objectTypePath)
 		finalizeLevel()
 		spwanRandomSquares(HitAbleList, 8, 50)
 	} else if name == "lvl03" {
-		loadTMX("assets/tiled/level03.tmx", objectTypePath)
+		loadTiledData("assets/tiled/level03.tmx", objectTypePath)
 		finalizeLevel()
 	}
-
-	// anim example
-	anim := com.NewAnimFromByte(ass.Runner_png, 200, 200, 0, com.Vector{}, com.NewFrame(0, 32, 32, 32, 8, 5))
-	DrawWorldList = append(DrawWorldList, &anim)
-	UpdateList = append(UpdateList, &anim)
 }
 
-func loadTMX(mapPath string, objectpath string) {
-	// parse tmx format
+// Handles Tiled data
+func loadTiledData(mapPath string, objectpath string) {
 	m, err := tiled.LoadFromFile(mapPath)
 	if err != nil {
 		fmt.Printf("error parsing map: %s", err.Error())
 		os.Exit(2)
 	}
 
-	// set Level properties from map properties
+	// set Level properties from tmx map properties
 	sha.LP = sha.LevelProperties{
 		Gravity:  getLevelGravity(m),
 		Friction: getLevelFriction(m),
@@ -101,7 +94,7 @@ func loadTMX(mapPath string, objectpath string) {
 	}
 	bg := com.NewBackground(sha.IDBG, sha.LP.BG, 0, 0, 0, sha.LP.Width, sha.LP.Height, com.Vector{})
 	DrawWorldList = append(DrawWorldList, &bg)
-	printLevelProperties()
+	fmt.Printf("\n\nLevel: %v\nProperties:%+v\n\n", mapPath, sha.LP)
 
 	// Get object types properties default values
 	objectTypes := getObjectTypes(objectpath)
@@ -126,8 +119,7 @@ func loadTMX(mapPath string, objectpath string) {
 	}
 }
 
-// Object properties are not in TMX level data
-// unless an object instance overrides its default value or adds an instance properyu
+// Tiled object types xml to Structs
 func getObjectTypes(xmlPath string) []ObjectType {
 	xmlFile, err := os.Open(xmlPath)
 	if err != nil {
@@ -142,73 +134,77 @@ func getObjectTypes(xmlPath string) []ObjectType {
 	return objectTypes.ObjectType
 }
 
-func getObjectProps(id string, objectTypes []ObjectType) []Property {
-	// match id, with objectType name
-	// if it matches return Properties
+// Factory for populating the level with GameObjects
+func addLevelItem(itemType, name string, x, y, w, h, rotation int, props tiled.Properties, objectTypes []ObjectType) {
+	// fmt.Printf("id:%v, name:%v, x:%v ,y:%v, w:%v, h:%v, r:%v, prop:%v", id, name, x, y, w, h, rotation, prop)
+	// get item properties
+	p := getItemProps(itemType, props, objectTypes)
+	switch itemType {
+	case "wall":
+		o := com.NewWall(sha.IDWall, x, y, w, h, sha.Blue50)
+		addItemToList(&o, p)
+		break
+	case "player":
+		player = com.NewPlayer(sha.IDPlayer, x, y, 0, com.Vector{}, 8, 8, 30, 48, sha.Red50)
+		addItemToList(&player, p)
+		break
+	case "tester":
+		o := com.NewCollideTest(sha.IDTester, x, y, 0, com.Vector{}, 4, 4, 24, 56, sha.Green50)
+		addItemToList(&o, p)
+		break
+	case "cp":
+		o := com.NewCheckpoint(sha.IDCheckpoint, x, y, w, h, sha.Cyan25, true)
+		checkpoints = append(checkpoints, &o)
+		addItemToList(&o, p)
+		break
+	case "finish":
+		finish = com.NewFinish(sha.IDFinish, x, y, w, h, sha.White25, nil)
+		addItemToList(&finish, p)
+		break
+	}
+}
+
+// Get the default, unique and overridden properties
+func getItemProps(typ string, props tiled.Properties, objectTypes []ObjectType) []Property {
+	// match id, with objectType.Name, if it matches return Properties
 	for _, o := range objectTypes {
-		if o.Name == id {
+		if o.Name == typ {
 			return o.Properties
 		}
 	}
-	// TODO also add overridden values from TMX and add unique instance properties
+	// TODO should check if values in props override the default value
 	return nil
 }
 
-func addLevelItem(id, name string, x, y, w, h, rotation int, prop tiled.Properties, objectTypes []ObjectType) {
-	//fmt.Printf("id:%v, name:%v, x:%v ,y:%v, w:%v, h:%v, r:%v, prop:%v", id, name, x, y, w, h, rotation, prop)
-
-	p := getObjectProps(id, objectTypes)
-	fmt.Println(p)
-
-	// TODO want to use the objectTypes to determine in which intrfaces list's it should be appended
-	// issue is that we can cast specific instances like a Player to something generic
-	// and then add it to interface list, which it fullfills the contract
-	// solutions
-	// - interface stubs?
-	// - type assertion?
-
-	if id == "wall" {
-		o := com.NewWall(sha.IDWall, x, y, w, h, sha.Blue50)
-		DrawWorldList = append(DrawWorldList, &o)
-		HitAbleList = append(HitAbleList, &o)
+// Add the GameObjects to the correct lists, based on the (default) properties in Tiled
+func addItemToList(item com.GameObject, properties []Property) {
+	for _, p := range properties {
+		if p.Name == "draw" && p.Default == "1" {
+			DrawWorldList = append(DrawWorldList, item)
+		}
+		if p.Name == "hit" && p.Default == "1" {
+			HitAbleList = append(HitAbleList, item)
+		}
+		if p.Name == "update" && p.Default == "1" {
+			UpdateList = append(UpdateList, item)
+		}
+		if p.Name == "collide" && p.Default == "1" {
+			CollideList = append(CollideList, item)
+		}
 	}
-
-	if id == "player" {
-		player = com.NewPlayer(sha.IDPlayer, x, y, 0, com.Vector{}, 8, 8, 30, 48, sha.Red50)
-		DrawWorldList = append(DrawWorldList, &player)
-		HitAbleList = append(HitAbleList, &player)
-		UpdateList = append(UpdateList, &player)
-		CollideList = append(CollideList, &player)
-		sha.LP.PlayerStartX = x
-		sha.LP.PlayerStartY = y
-	}
-	if id == "tester" {
-		o := com.NewCollideTest(sha.IDTester, x, y, 0, com.Vector{}, 4, 4, 24, 56, sha.Green50)
-		DrawWorldList = append(DrawWorldList, &o)
-		HitAbleList = append(HitAbleList, &o)
-		UpdateList = append(UpdateList, &o)
-		CollideList = append(CollideList, &o)
-	}
-	if id == "cp" {
-		o := com.NewCheckpoint(sha.IDCheckpoint, x, y, w, h, sha.Cyan25, true)
-		checkpoints = append(checkpoints, &o)
-		DrawWorldList = append(DrawWorldList, &o)
-		HitAbleList = append(HitAbleList, &o)
-	}
-	if id == "finish" {
-		finish = com.NewFinish(sha.IDFinish, x, y, w, h, sha.White25, nil)
-		DrawWorldList = append(DrawWorldList, &finish)
-		HitAbleList = append(HitAbleList, &finish)
-	}
-
 }
 
+// Finilize level, do stuff we can only do when we have all objects or data
 func finalizeLevel() {
 	// set world render image (same size as the level)
 	SetWorldImage(sha.LP.Width, sha.LP.Height)
 
+	// player init position
+	sha.LP.PlayerStartX = int(player.X)
+	sha.LP.PlayerStartY = int(player.Y)
+
 	// create gui
-	tb := com.NewTextBlock(sha.ScreenWidth-80, 50)
+	tb := com.NewTextBlock(10, 24)
 	DrawScreenList = append(DrawScreenList, &tb)
 
 	// add all checkpoints to finish
@@ -216,8 +212,8 @@ func finalizeLevel() {
 	printLevelObjects()
 }
 
-// spwans squares in playable level dimensions, and makes sure that the squares dont overlap other objects
-func spwanRandomSquares(list []com.HitAble, count, size int) {
+// Spawns squares in playable level dimensions, and makes sure that the squares dont overlap other objects
+func spwanRandomSquares(list []com.GameObject, count, size int) {
 	for i := 0; i < count; i++ {
 		// get random free position and random velocity
 		x, y := getRandonPosition(size, size, size, list)
@@ -249,30 +245,18 @@ func getLevelBackground(m *tiled.Map) string {
 }
 
 func getLevelGravity(m *tiled.Map) float64 {
-	value, err := strconv.ParseFloat(m.Properties.GetString("gravity"), 64)
-	if err != nil {
-		fmt.Println("Failed to load Gravity from Map ", value, err)
-	}
-	return value
+	return m.Properties.GetFloat("gravity")
 }
 
 func getLevelFriction(m *tiled.Map) float64 {
-	value, err := strconv.ParseFloat(m.Properties.GetString("friction"), 64)
-	if err != nil {
-		fmt.Println("Failed to load Friction from Map ", value, err)
-	}
-	return value
+	return m.Properties.GetFloat("friction")
 }
 
 func getLevelMaxMaps(m *tiled.Map) int {
-	value, err := strconv.Atoi(m.Properties.GetString("maxLaps"))
-	if err != nil {
-		fmt.Println("Failed to load MaxLaps from Map ", value, err)
-	}
-	return value
+	return m.Properties.GetInt("maxLaps")
 }
 
-func getRandonPosition(offsetX, offsetY, space int, dontOverlap []com.HitAble) (int, int) {
+func getRandonPosition(offsetX, offsetY, space int, dontOverlap []com.GameObject) (int, int) {
 	x := rand.Intn(int(sha.LP.Width)-(offsetX*2)) + offsetX
 	y := rand.Intn(int(sha.LP.Height)-(offsetY*2)) + offsetY
 	r := com.NewRect(x, y, space, space)
@@ -284,10 +268,6 @@ func getRandonPosition(offsetX, offsetY, space int, dontOverlap []com.HitAble) (
 		}
 	}
 	return x, y
-}
-
-func printLevelProperties() {
-	fmt.Printf("level properties:\n%+v\n", sha.LP)
 }
 
 func printLevelObjects() {

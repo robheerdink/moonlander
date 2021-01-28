@@ -5,9 +5,9 @@
  </editorsettings>
  <properties>
   <property name="background" value="assets/space.png"/>
-  <property name="friction" value="0.996"/>
-  <property name="gravity" value="0.03"/>
-  <property name="maxLaps" value="3"/>
+  <property name="friction" type="float" value="1"/>
+  <property name="gravity" type="float" value="0"/>
+  <property name="maxLaps" type="int" value="3"/>
  </properties>
  <tileset firstgid="1" source="tilesets/squares.tsx"/>
  <layer id="1" name="layer1" width="40" height="30">

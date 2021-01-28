@@ -31,7 +31,7 @@ func NewBackground(id int, imagePath string, x, y, z, w, h int, v Vector) Backgr
 	}
 }
 
-// Draw implements Drawer
+// Draw implements interface
 func (o *Background) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(o.X, o.Y)

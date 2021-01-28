@@ -1,7 +1,6 @@
 package com
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -91,11 +90,8 @@ func (o *Player) Draw(screen *ebiten.Image) error {
 			screen.DrawImage(o.rectImg, op)
 		}
 	}
-
 	// draw Player related info
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f\nx : %0.2f\ny : %0.2f\nz : %0.2f\nv : %0.4f",
-		ebiten.CurrentTPS(), o.X, o.Y, o.R, o.Vector))
-
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("x: %0.2f\ny: %0.2f\nz: %0.2f\nv: %0.4f", o.X, o.Y, o.R, o.Vector))
 	return nil
 }
 
@@ -247,7 +243,7 @@ func (o *Player) Update(screen *ebiten.Image) error {
 }
 
 // Collide implements interface, handles collission with ojects
-func (o *Player) Collide(hitAbles []HitAble) error {
+func (o *Player) Collide(hitAbles []GameObject) error {
 	o.grounded = false
 
 	for _, h := range hitAbles {

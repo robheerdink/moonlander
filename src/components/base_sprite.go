@@ -20,12 +20,12 @@ func NewSprite(id int, img *ebiten.Image, x, y, z int, v Vector) Sprite {
 	return Sprite{id, img, float64(x), float64(y), float64(z), v}
 }
 
-// GetID implements interface, returns an id
+// GetID implements interface
 func (o *Sprite) GetID() int {
 	return o.ID
 }
 
-// GetInfo implements interface, returns info for debugging
+// GetInfo implements interface
 func (o *Sprite) GetInfo() (id int, name string, x, y, r float64, w, h int) {
 	w, h = o.Img.Size()
 	return o.ID, sha.Name[o.ID], o.X, o.Y, o.R, w, h
@@ -39,9 +39,23 @@ func (o *Sprite) Draw(screen *ebiten.Image) error {
 	return nil
 }
 
-// Update Sprite
+// Update implements interface
 func (o *Sprite) Update(screen *ebiten.Image) error {
-	o.X += o.Vector.x
-	o.Y += o.Vector.y
+	//o.X += o.Vector.x
+	//o.Y += o.Vector.y
+	return nil
+}
+
+// GetObject implements interface
+func (o *Sprite) GetObject() *Object {
+	return nil
+}
+
+// SetHit implements interface
+func (o *Sprite) SetHit(collider GameObject) {
+}
+
+// Collide implements interface
+func (o *Sprite) Collide(hitAbles []GameObject) error {
 	return nil
 }
